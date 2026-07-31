@@ -1,0 +1,355 @@
+:root {
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  color: var(--relay-text);
+  background: var(--relay-bg);
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  color: var(--relay-text);
+  background: var(--relay-bg);
+}
+
+#root {
+  min-height: 100vh;
+  color: var(--relay-text);
+  background: var(--relay-bg);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.centered-state {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 16px;
+  padding: 24px;
+}
+
+.relay-logo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 44px;
+  font-size: 17px;
+  letter-spacing: -0.03em;
+}
+
+.relay-logo__mark {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.relay-logo__mark i {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #665cf6;
+}
+
+.relay-logo__mark i:first-child {
+  transform: translate(-8px, 7px);
+  background: #ef6b72;
+}
+
+.relay-logo__mark i:nth-child(2) {
+  transform: translate(8px, 7px);
+  background: #f3a953;
+}
+
+.relay-logo__mark i:last-child {
+  transform: translateY(-7px);
+}
+
+.auth-layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(440px, 1.1fr) minmax(440px, 0.9fr);
+}
+
+.auth-layout__story {
+  color: #24232b;
+  padding: 48px clamp(48px, 7vw, 112px);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background:
+    radial-gradient(circle at 15% 85%, rgb(239 107 114 / 20%), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgb(102 92 246 / 18%), transparent 28%), #f0efe9;
+}
+
+.auth-layout__story::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgb(35 36 42 / 5%) 1px, transparent 1px);
+  background-size: 100% 48px;
+  pointer-events: none;
+}
+
+.auth-layout__story-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 650px;
+}
+
+.signal-pill,
+.auth-card__heading > span {
+  color: #5b50df;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.auth-layout__story-copy h1 {
+  margin: 22px 0 20px;
+  font-size: clamp(42px, 5.3vw, 74px);
+  line-height: 0.98;
+  letter-spacing: -0.06em;
+  max-width: 700px;
+}
+
+.auth-layout__story-copy p {
+  max-width: 560px;
+  color: #606069;
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.status-preview {
+  position: relative;
+  z-index: 1;
+  max-width: 560px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  background: rgb(255 255 255 / 75%);
+  border: 1px solid rgb(35 36 42 / 9%);
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 24px 70px rgb(52 48 80 / 12%);
+  backdrop-filter: blur(12px);
+}
+
+.status-preview__pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d94a5b;
+  box-shadow: 0 0 0 6px rgb(217 74 91 / 12%);
+}
+
+.status-preview small,
+.status-preview strong {
+  display: block;
+}
+
+.status-preview small {
+  color: #6f717a;
+}
+
+.status-preview b {
+  color: #c83649;
+  background: #fff0f2;
+  border-radius: 7px;
+  padding: 5px 8px;
+}
+
+.auth-layout__form {
+  display: grid;
+  place-items: center;
+  padding: 40px;
+  color: var(--relay-text);
+  background: var(--relay-surface);
+}
+
+.auth-card {
+  width: min(430px, 100%);
+  color: var(--relay-text);
+}
+
+.auth-card__heading {
+  margin-bottom: 28px;
+}
+
+.auth-card__heading h2 {
+  margin: 8px 0;
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+
+.auth-card__heading p,
+.auth-card__footer {
+  color: var(--relay-text-secondary);
+}
+
+.form-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.form-stack--compact {
+  gap: 12px;
+}
+
+.form-stack label,
+.settings-field,
+.modal-field {
+  display: grid;
+  gap: 7px;
+  color: var(--relay-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.field-error {
+  color: var(--relay-danger);
+  font-weight: 500;
+}
+
+.auth-card__footer {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.app-layout {
+  min-height: 100vh;
+  color: var(--relay-text);
+  background: var(--relay-bg);
+}
+
+.app-sider {
+  border-right: 1px solid var(--relay-border);
+}
+
+.app-nav {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-nav__brand {
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+}
+
+.app-nav .ant-menu {
+  border-inline-end: 0 !important;
+  background: transparent;
+}
+
+.app-nav__footer {
+  margin: auto 14px 18px;
+  padding: 13px;
+  border: 1px solid var(--relay-border);
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.app-nav__footer strong,
+.app-nav__footer small {
+  display: block;
+  white-space: nowrap;
+}
+
+.app-nav__footer strong {
+  font-size: 11px;
+}
+
+.app-nav__footer small {
+  color: var(--relay-text-secondary);
+  font-size: 10px;
+}
+
+.app-nav__signal {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1da77e;
+  box-shadow: 0 0 0 5px rgb(29 167 126 / 10%);
+}
+
+.app-header {
+  height: 70px;
+  padding: 0 22px;
+  color: var(--relay-text);
+  background: var(--relay-surface);
+  border-bottom: 1px solid var(--relay-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tenant-select {
+  width: 150px;
+}
+
+.tenant-select--organisation {
+  width: 180px;
+}
+
+.tenant-divider {
+  color: var(--relay-text-muted);
+}
+
+.role-tag {
+  text-transform: capitalize;
+  border-radius: 20px;
+}
+
+.profile-button {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-content {
+  overflow: auto;
+}
+
+.skip-link {
+  position: fixed;
+  top: -60px;
+  left: 16px;
+  z-index: 2000;
+  padding: 10px 14px;
+  background: var(--relay-accent-solid);
+  color: var(--relay-on-accent);
+  border-radius: 8px;
+}
+
+.skip-link:focus {
+  top: 10px;
+}
