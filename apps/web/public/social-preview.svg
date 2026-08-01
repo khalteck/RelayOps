@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" role="img" aria-labelledby="title description">
+  <title id="title">RelayOps incident operations platform</title>
+  <desc id="description">Keep every response moving in the same direction.</desc>
+  <defs>
+    <radialGradient id="glow" cx="0" cy="1" r="1.2">
+      <stop offset="0" stop-color="#ef6b72" stop-opacity=".24"/>
+      <stop offset=".55" stop-color="#665cf6" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#f4f3ee" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <g transform="translate(0 285)">
+  <rect width="1200" height="630" fill="#f4f3ee"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <g opacity=".08" stroke="#24232b"><path d="M0 105h1200M0 210h1200M0 315h1200M0 420h1200M0 525h1200"/></g>
+  <g transform="translate(86 82)">
+    <path d="M14 38 34 8l20 30" fill="none" stroke="#24232b" stroke-opacity=".14" stroke-width="5"/>
+    <circle cx="14" cy="38" r="11" fill="#ef6b72"/>
+    <circle cx="54" cy="38" r="11" fill="#f3a953"/>
+    <circle cx="34" cy="8" r="11" fill="#665cf6"/>
+    <text x="78" y="39" fill="#24232b" font-family="Inter,Arial,sans-serif" font-size="34" font-weight="700">RelayOps</text>
+  </g>
+  <text x="86" y="265" fill="#24232b" font-family="Inter,Arial,sans-serif" font-size="70" font-weight="750" letter-spacing="-3">
+    <tspan x="86">Incident coordination,</tspan><tspan x="86" dy="82">without the noise.</tspan>
+  </text>
+  <text x="90" y="485" fill="#62616a" font-family="Inter,Arial,sans-serif" font-size="28">Multi-tenant service operations for distributed product teams.</text>
+  <g transform="translate(875 140)">
+    <rect width="240" height="330" rx="24" fill="#fff" stroke="#24232b" stroke-opacity=".1"/>
+    <rect x="28" y="34" width="115" height="13" rx="6" fill="#24232b" opacity=".14"/>
+    <rect x="28" y="70" width="184" height="66" rx="14" fill="#665cf6" opacity=".12"/>
+    <circle cx="52" cy="103" r="9" fill="#ef6b72"/>
+    <rect x="72" y="92" width="112" height="9" rx="4" fill="#24232b" opacity=".7"/>
+    <rect x="72" y="111" width="76" height="7" rx="3" fill="#24232b" opacity=".2"/>
+    <rect x="28" y="157" width="184" height="66" rx="14" fill="#f3a953" opacity=".12"/>
+    <circle cx="52" cy="190" r="9" fill="#f3a953"/>
+    <rect x="72" y="179" width="98" height="9" rx="4" fill="#24232b" opacity=".7"/>
+    <rect x="72" y="198" width="123" height="7" rx="3" fill="#24232b" opacity=".2"/>
+    <path d="M30 278c30-42 56-21 83-58 26-36 49 34 98-28" fill="none" stroke="#665cf6" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  </g>
+</svg>

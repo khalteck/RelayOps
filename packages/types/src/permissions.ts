@@ -4,6 +4,7 @@ export const PERMISSIONS = [
   "organisation:update",
   "workspace:create",
   "workspace:update",
+  "members:manage",
   "sla:update",
   "incident:create",
   "incident:update:any",
@@ -21,7 +22,9 @@ export type Permission = (typeof PERMISSIONS)[number];
 
 const rolePermissions: Record<Role, readonly Permission[]> = {
   owner: PERMISSIONS,
-  administrator: PERMISSIONS.filter((permission) => permission !== "organisation:update"),
+  administrator: PERMISSIONS.filter(
+    (permission) => permission !== "organisation:update" && permission !== "members:manage"
+  ),
   responder: [
     "incident:create",
     "incident:update:assigned",

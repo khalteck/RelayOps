@@ -6,6 +6,7 @@ export interface ApiMeta {
   pageSize?: number;
   total?: number;
   totalPages?: number;
+  nextCursor?: string;
   serverTime: string;
 }
 

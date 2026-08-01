@@ -1,0 +1,212 @@
+.relay-filter-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 14px;
+  border: 1px solid var(--relay-border);
+  border-radius: 12px;
+  background: var(--relay-surface);
+}
+
+.relay-filter-bar__primary,
+.relay-filter-bar__secondary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.relay-filter-bar__primary {
+  flex: 1;
+}
+
+.incident-search {
+  width: min(310px, 100%);
+}
+
+.filter-select {
+  width: 170px;
+}
+
+.filter-select--small {
+  width: 130px;
+}
+
+.saved-view-select {
+  width: 170px;
+}
+
+.column-select {
+  width: 125px;
+}
+
+.date-filter {
+  width: 150px;
+}
+
+.relay-table-region {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--relay-border);
+  border-radius: 12px;
+  outline: none;
+  overflow: hidden;
+  background: var(--relay-surface);
+}
+
+.relay-table-region:focus-visible {
+  box-shadow: 0 0 0 3px var(--relay-accent-muted);
+}
+
+.relay-table-row--interactive {
+  cursor: pointer;
+}
+
+.relay-table-row--interactive:focus-visible > td {
+  outline: 2px solid var(--relay-accent);
+  outline-offset: -2px;
+}
+
+.incident-title-cell {
+  display: grid;
+  gap: 3px;
+}
+
+.incident-title-cell strong {
+  overflow: hidden;
+  color: var(--relay-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.incident-title-cell span {
+  overflow: hidden;
+  color: var(--relay-text-secondary);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sla-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--relay-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sla-inline i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--relay-success);
+}
+
+.sla-inline--at-risk {
+  color: var(--relay-warning);
+}
+
+.sla-inline--at-risk i {
+  background: var(--relay-warning);
+}
+
+.sla-inline--breached {
+  color: var(--relay-danger);
+}
+
+.sla-inline--breached i {
+  background: var(--relay-danger);
+}
+
+.sla-inline--met i {
+  background: var(--relay-success);
+}
+
+.incident-form,
+.incident-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.incident-form {
+  gap: 20px;
+}
+
+.incident-form label > span,
+.incident-controls label > span {
+  color: var(--relay-text);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.incident-form__row,
+.incident-control-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.drawer-footer-actions {
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.form-hint {
+  margin: 0;
+  padding: 11px 13px;
+  color: var(--relay-text-secondary);
+  border-radius: 8px;
+  background: var(--relay-surface-muted);
+  font-size: 12px;
+}
+
+.export-fields,
+.export-fields label {
+  display: grid;
+  gap: 8px;
+}
+
+.export-fields {
+  gap: 18px;
+}
+
+.export-fields label > span {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.export-fields small {
+  color: var(--relay-text-secondary);
+}
+
+@media (max-width: 900px) {
+  .relay-filter-bar {
+    flex-direction: column;
+  }
+
+  .relay-filter-bar__primary,
+  .relay-filter-bar__secondary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .incident-page .page-header__actions,
+  .incident-page .page-header__actions .ant-btn {
+    width: 100%;
+  }
+
+  .incident-search,
+  .filter-select,
+  .filter-select--small {
+    width: 100%;
+  }
+
+  .incident-form__row,
+  .incident-control-grid {
+    grid-template-columns: 1fr;
+  }
+}

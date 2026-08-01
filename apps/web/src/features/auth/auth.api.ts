@@ -1,4 +1,10 @@
-import { type LoginInput, type RegisterInput, type SessionPayload } from "@relayops/types";
+import {
+  type LoginInput,
+  type RegisterInput,
+  type SessionPayload,
+  type SessionUser,
+  type UpdateProfileInput
+} from "@relayops/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../../app/query-keys";
 import { apiRequest } from "../../services/api-client";
@@ -46,5 +52,21 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => apiRequest<void>("/api/v1/auth/logout", { method: "POST" }),
     onSuccess: () => client.clear()
+  });
+}
+
+export function useUpdateProfile() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateProfileInput) =>
+      apiRequest<SessionUser>("/api/v1/auth/profile", {
+        method: "PATCH",
+        body: JSON.stringify(input)
+      }),
+    onSuccess: ({ data }) => {
+      client.setQueryData<SessionPayload>(queryKeys.session, (current) =>
+        current ? { ...current, user: data } : current
+      );
+    }
   });
 }

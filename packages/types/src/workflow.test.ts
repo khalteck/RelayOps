@@ -19,4 +19,9 @@ describe("role permissions", () => {
     expect(hasPermission("administrator", "organisation:update")).toBe(false);
     expect(hasPermission("viewer", "incident:create")).toBe(false);
   });
+
+  it("reserves organisation member management for owners", () => {
+    expect(hasPermission("owner", "members:manage")).toBe(true);
+    expect(hasPermission("administrator", "members:manage")).toBe(false);
+  });
 });

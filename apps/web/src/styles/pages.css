@@ -1,4 +1,6 @@
 .page {
+  width: 100%;
+  min-width: 0;
   max-width: 1280px;
   margin: 0 auto;
   padding: 38px clamp(20px, 4vw, 54px) 64px;
@@ -42,7 +44,29 @@
   justify-content: space-between;
   align-items: center;
   gap: 30px;
-  min-height: 190px;
+  min-height: 136px;
+}
+
+.dashboard-page .welcome-panel {
+  margin-bottom: 24px;
+}
+
+.dashboard-page .welcome-panel p {
+  margin-bottom: 0;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 14px;
+}
+
+.section-heading h2 {
+  margin: 5px 0 0;
+  font-size: 22px;
+  letter-spacing: -0.025em;
 }
 
 .welcome-panel__copy {
@@ -156,77 +180,6 @@
   background: var(--relay-border);
 }
 
-.settings-card {
-  margin-bottom: 18px;
-}
-
-.settings-inline {
-  width: min(520px, 100%);
-}
-
-.settings-field {
-  max-width: 520px;
-}
-
-.sla-grid {
-  max-width: 650px;
-}
-
-.sla-grid__header,
-.sla-grid__row {
-  display: grid;
-  grid-template-columns: 100px 1fr 1fr;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 0;
-}
-
-.sla-grid__header {
-  color: var(--relay-text-secondary);
-  font-size: 12px;
-}
-
-.sla-grid .ant-input-number {
-  width: 100%;
-}
-
-.priority-badge {
-  width: fit-content;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.priority-badge--p1 {
-  color: var(--relay-danger);
-  background: var(--relay-danger-muted);
-}
-
-.priority-badge--p2 {
-  color: var(--relay-warning);
-  background: var(--relay-warning-muted);
-}
-
-.priority-badge--p3,
-.priority-badge--p4 {
-  color: var(--relay-accent);
-  background: var(--relay-accent-muted);
-}
-
-.settings-actions {
-  margin-top: 22px;
-}
-
-.modal-field input {
-  width: 100%;
-  border: 1px solid var(--relay-border);
-  border-radius: 7px;
-  padding: 8px 11px;
-  color: var(--relay-text);
-  background: var(--relay-surface);
-}
-
 @media (max-width: 900px) {
   .auth-layout {
     grid-template-columns: 1fr;
@@ -242,6 +195,11 @@
 
   .welcome-panel .ant-card-body,
   .stage-card .ant-card-body {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .section-heading {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -287,12 +245,6 @@
 
   .sla-mini {
     width: 100%;
-  }
-
-  .sla-grid__header,
-  .sla-grid__row {
-    grid-template-columns: 65px 1fr 1fr;
-    gap: 7px;
   }
 }
 

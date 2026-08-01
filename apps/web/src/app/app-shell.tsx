@@ -1,6 +1,8 @@
 import {
+  AlertOutlined,
   BulbOutlined,
   DashboardOutlined,
+  FileSearchOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuOutlined,
@@ -31,6 +33,11 @@ import {
   useCreateOrganisation,
   useOrganisations
 } from "../features/organisations/organisations.api";
+import {
+  RealtimeConnectionLabel,
+  WorkspaceRealtimeProvider
+} from "../features/realtime/realtime-provider";
+import { NotificationCenter } from "../features/notifications/notification-center";
 import { useUiStore } from "../stores/ui.store";
 
 const { Header, Sider, Content } = Layout;
@@ -47,6 +54,7 @@ export function AppShell() {
   const createOrganisation = useCreateOrganisation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const [newOrganisationName, setNewOrganisationName] = useState("");
   const collapsed = useUiStore((state) => state.sidebarCollapsed);
   const toggleSidebar = useUiStore((state) => state.toggleSidebar);
@@ -55,17 +63,15 @@ export function AppShell() {
 
   const organisation = organisations.data?.find((item) => item.slug === params.orgSlug);
   const workspace = organisation?.workspaces.find((item) => item.slug === params.workspaceSlug);
-  const canManageWorkspace = organisation?.permissions.includes("workspace:update") ?? false;
-
   const switchOrganisation = (organisationId: string) => {
     const next = organisations.data?.find((item) => item.id === organisationId);
     const nextWorkspace = next?.workspaces[0];
-    if (next && nextWorkspace) void navigate(`/app/${next.slug}/${nextWorkspace.slug}/overview`);
+    if (next && nextWorkspace) void navigate(`/app/${next.slug}/${nextWorkspace.slug}/dashboard`);
   };
 
   const switchWorkspace = (workspaceId: string) => {
     const next = organisation?.workspaces.find((item) => item.id === workspaceId);
-    if (next && organisation) void navigate(`/app/${organisation.slug}/${next.slug}/overview`);
+    if (next && organisation) void navigate(`/app/${organisation.slug}/${next.slug}/dashboard`);
   };
 
   const createTenant = async () => {
@@ -76,46 +82,52 @@ export function AppShell() {
     setNewOrganisationName("");
     void message.success("Organisation created");
     if (nextWorkspace) {
-      await navigate(`/app/${result.data.slug}/${nextWorkspace.slug}/overview`);
+      await navigate(`/app/${result.data.slug}/${nextWorkspace.slug}/dashboard`);
     }
   };
 
   const nav = (
     <div className="app-nav">
       <div className="app-nav__brand">
-        <RelayLogo compact={Boolean(collapsed && screens.md)} />
+        <RelayLogo compact={Boolean(collapsed && screens.lg)} />
       </div>
       <Menu
         mode="inline"
-        selectedKeys={[location.pathname.endsWith("/settings") ? "settings" : "overview"]}
+        selectedKeys={[location.pathname.split("/").at(-1) ?? "dashboard"]}
         items={[
           {
-            key: "overview",
+            key: "dashboard",
             icon: <DashboardOutlined />,
-            label: "Overview",
-            onClick: () => void navigate(`/app/${organisation?.slug}/${workspace?.slug}/overview`)
+            label: "Dashboard",
+            onClick: () => void navigate(`/app/${organisation?.slug}/${workspace?.slug}/dashboard`)
           },
-          ...(canManageWorkspace
+          {
+            key: "incidents",
+            icon: <AlertOutlined />,
+            label: "Incidents",
+            onClick: () => void navigate(`/app/${organisation?.slug}/${workspace?.slug}/incidents`)
+          },
+          ...(organisation?.permissions.includes("audit:read")
             ? [
                 {
-                  key: "settings",
-                  icon: <SettingOutlined />,
-                  label: "Workspace settings",
+                  key: "audit-log",
+                  icon: <FileSearchOutlined />,
+                  label: "Audit log",
                   onClick: () =>
-                    void navigate(`/app/${organisation?.slug}/${workspace?.slug}/settings`)
+                    void navigate(`/app/${organisation.slug}/${workspace?.slug}/audit-log`)
                 }
               ]
-            : [])
+            : []),
+          {
+            key: "settings",
+            icon: <SettingOutlined />,
+            label: "Settings",
+            onClick: () => void navigate(`/app/${organisation?.slug}/${workspace?.slug}/settings`)
+          }
         ]}
       />
       <div className="app-nav__footer">
-        <span className="app-nav__signal" />
-        {!collapsed || !screens.md ? (
-          <div>
-            <strong>All systems connected</strong>
-            <small>Foundation environment</small>
-          </div>
-        ) : null}
+        <RealtimeConnectionLabel compact={Boolean(collapsed && screens.lg)} />
       </div>
     </div>
   );
@@ -129,135 +141,156 @@ export function AppShell() {
       onRetry={() => void organisations.refetch()}
     >
       {organisation && workspace ? (
-        <Layout className="app-layout">
-          <a className="skip-link" href="#main-content">
-            Skip to main content
-          </a>
-          {screens.md ? (
-            <Sider
-              width={248}
-              collapsedWidth={76}
-              collapsed={collapsed}
-              className="app-sider"
-              trigger={null}
-            >
-              {nav}
-            </Sider>
-          ) : (
-            <Drawer
-              placement="left"
-              width={280}
-              open={mobileOpen}
-              onClose={() => setMobileOpen(false)}
-              styles={{ body: { padding: 0 } }}
-            >
-              {nav}
-            </Drawer>
-          )}
-          <Layout>
-            <Header className="app-header">
-              <Space size={8}>
-                <Button
-                  type="text"
-                  icon={
-                    screens.md ? (
-                      collapsed ? (
-                        <MenuUnfoldOutlined />
+        <WorkspaceRealtimeProvider workspaceId={workspace.id}>
+          <Layout className="app-layout">
+            <a className="skip-link" href="#main-content">
+              Skip to main content
+            </a>
+            {screens.lg ? (
+              <Sider
+                width={224}
+                collapsedWidth={68}
+                collapsed={collapsed}
+                className="app-sider"
+                trigger={null}
+              >
+                {nav}
+              </Sider>
+            ) : (
+              <Drawer
+                placement="left"
+                width={280}
+                open={mobileOpen}
+                onClose={() => setMobileOpen(false)}
+                styles={{ body: { padding: 0 } }}
+              >
+                {nav}
+              </Drawer>
+            )}
+            <Layout className="app-main-layout">
+              <Header className="app-header">
+                <Space size={8} className="app-header__tenant">
+                  <Button
+                    type="text"
+                    icon={
+                      screens.lg ? (
+                        collapsed ? (
+                          <MenuUnfoldOutlined />
+                        ) : (
+                          <MenuFoldOutlined />
+                        )
                       ) : (
-                        <MenuFoldOutlined />
+                        <MenuOutlined />
                       )
-                    ) : (
-                      <MenuOutlined />
-                    )
-                  }
-                  aria-label={screens.md ? "Toggle sidebar" : "Open navigation"}
-                  onClick={screens.md ? toggleSidebar : () => setMobileOpen(true)}
-                />
-                <Select
-                  aria-label="Organisation"
-                  value={organisation.id}
-                  className="tenant-select tenant-select--organisation"
-                  onChange={switchOrganisation}
-                  options={
-                    organisations.data?.map((item) => ({
+                    }
+                    aria-label={screens.lg ? "Toggle sidebar" : "Open navigation"}
+                    onClick={screens.lg ? toggleSidebar : () => setMobileOpen(true)}
+                  />
+                  <Select
+                    aria-label="Organisation"
+                    value={organisation.id}
+                    className="tenant-select tenant-select--organisation"
+                    onChange={switchOrganisation}
+                    options={
+                      organisations.data?.map((item) => ({
+                        value: item.id,
+                        label: item.name
+                      })) ?? []
+                    }
+                  />
+                  <span className="tenant-divider">/</span>
+                  <Select
+                    aria-label="Workspace"
+                    value={workspace.id}
+                    className="tenant-select"
+                    onChange={switchWorkspace}
+                    options={organisation.workspaces.map((item) => ({
                       value: item.id,
                       label: item.name
-                    })) ?? []
-                  }
-                />
-                <span className="tenant-divider">/</span>
-                <Select
-                  aria-label="Workspace"
-                  value={workspace.id}
-                  className="tenant-select"
-                  onChange={switchWorkspace}
-                  options={organisation.workspaces.map((item) => ({
-                    value: item.id,
-                    label: item.name
-                  }))}
-                />
-                <Tooltip title="Create organisation">
-                  <Button type="text" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)} />
-                </Tooltip>
-              </Space>
-              <Space>
-                <Tag className="role-tag">{organisation.role}</Tag>
-                <Dropdown
-                  menu={{
-                    items: [
-                      {
-                        key: "theme",
-                        icon: <BulbOutlined />,
-                        label: `Theme: ${theme}`,
-                        onClick: () =>
-                          setTheme(
-                            theme === "system" ? "light" : theme === "light" ? "dark" : "system"
-                          )
-                      },
-                      { type: "divider" },
-                      {
-                        key: "logout",
-                        icon: <LogoutOutlined />,
-                        label: "Sign out",
-                        onClick: async () => {
-                          await logout.mutateAsync();
-                          await navigate("/login");
+                    }))}
+                  />
+                  <Tooltip title="Create organisation">
+                    <Button
+                      className="create-organisation-button"
+                      type="text"
+                      icon={<PlusOutlined />}
+                      onClick={() => setCreateOpen(true)}
+                    />
+                  </Tooltip>
+                </Space>
+                <Space className="app-header__actions">
+                  <NotificationCenter />
+                  <Tag className="role-tag">{organisation.role}</Tag>
+                  <Dropdown
+                    menu={{
+                      items: [
+                        {
+                          key: "theme",
+                          icon: <BulbOutlined />,
+                          label: `Theme: ${theme}`,
+                          onClick: () =>
+                            setTheme(
+                              theme === "system" ? "light" : theme === "light" ? "dark" : "system"
+                            )
+                        },
+                        { type: "divider" },
+                        {
+                          key: "logout",
+                          icon: <LogoutOutlined />,
+                          label: "Sign out",
+                          danger: true,
+                          onClick: () => setSignOutOpen(true)
                         }
-                      }
-                    ]
-                  }}
-                >
-                  <Button type="text" className="profile-button">
-                    <Avatar size={30}>{session.data?.user.name.slice(0, 1).toUpperCase()}</Avatar>
-                    {screens.sm ? <span>{session.data?.user.name}</span> : null}
-                  </Button>
-                </Dropdown>
-              </Space>
-            </Header>
-            <Content id="main-content" className="app-content">
-              <Outlet context={{ organisation, workspace }} />
-            </Content>
+                      ]
+                    }}
+                  >
+                    <Button type="text" className="profile-button">
+                      <Avatar size={30}>{session.data?.user.name.slice(0, 1).toUpperCase()}</Avatar>
+                      {screens.sm ? <span>{session.data?.user.name}</span> : null}
+                    </Button>
+                  </Dropdown>
+                </Space>
+              </Header>
+              <Content id="main-content" className="app-content">
+                <Outlet context={{ organisation, workspace }} />
+              </Content>
+            </Layout>
+            <Modal
+              title="Create an organisation"
+              open={createOpen}
+              okText="Create organisation"
+              confirmLoading={createOrganisation.isPending}
+              okButtonProps={{ disabled: newOrganisationName.trim().length < 2 }}
+              onOk={() => void createTenant()}
+              onCancel={() => setCreateOpen(false)}
+            >
+              <label className="modal-field">
+                <span>Organisation name</span>
+                <input
+                  autoFocus
+                  value={newOrganisationName}
+                  onChange={(event) => setNewOrganisationName(event.target.value)}
+                  placeholder="e.g. Northstar Product"
+                />
+              </label>
+            </Modal>
+            <Modal
+              title="Sign out of RelayOps?"
+              open={signOutOpen}
+              okText="Sign out"
+              okButtonProps={{ danger: true }}
+              confirmLoading={logout.isPending}
+              onOk={async () => {
+                await logout.mutateAsync();
+                setSignOutOpen(false);
+                await navigate("/login");
+              }}
+              onCancel={() => setSignOutOpen(false)}
+            >
+              <p>You will need to sign in again to access your organisations and workspaces.</p>
+            </Modal>
           </Layout>
-          <Modal
-            title="Create an organisation"
-            open={createOpen}
-            okText="Create organisation"
-            confirmLoading={createOrganisation.isPending}
-            okButtonProps={{ disabled: newOrganisationName.trim().length < 2 }}
-            onOk={() => void createTenant()}
-            onCancel={() => setCreateOpen(false)}
-          >
-            <label className="modal-field">
-              <span>Organisation name</span>
-              <input
-                autoFocus
-                value={newOrganisationName}
-                onChange={(event) => setNewOrganisationName(event.target.value)}
-                placeholder="e.g. Northstar Product"
-              />
-            </label>
-          </Modal>
-        </Layout>
+        </WorkspaceRealtimeProvider>
       ) : null}
     </AsyncState>
   );

@@ -9,7 +9,7 @@ export function Component() {
 
   if (firstOrganisation && firstWorkspace) {
     return (
-      <Navigate replace to={`/app/${firstOrganisation.slug}/${firstWorkspace.slug}/overview`} />
+      <Navigate replace to={`/app/${firstOrganisation.slug}/${firstWorkspace.slug}/dashboard`} />
     );
   }
 

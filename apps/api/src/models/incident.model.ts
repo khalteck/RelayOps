@@ -31,6 +31,7 @@ export interface IncidentDocument {
   assigneeId?: Types.ObjectId;
   sla: IncidentSla;
   revision: number;
+  reportedAt: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -56,7 +57,8 @@ const incidentSchema = new Schema<IncidentDocument>(
       acknowledgedAt: Date,
       resolvedAt: Date
     },
-    revision: { type: Number, default: 1, required: true }
+    revision: { type: Number, default: 1, required: true },
+    reportedAt: { type: Date, required: true, default: Date.now }
   },
   { timestamps: true }
 );

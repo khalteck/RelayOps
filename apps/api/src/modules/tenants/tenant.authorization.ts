@@ -11,6 +11,10 @@ export interface TenantAccess {
   workspaceIds: string[];
 }
 
+export interface WorkspaceTenantContext extends TenantAccess {
+  workspaceId: string;
+}
+
 export async function requireOrganisationAccess(
   userId: string,
   organisationId: string,
@@ -36,7 +40,7 @@ export async function requireWorkspaceAccess(
   userId: string,
   workspaceId: string,
   permission?: Permission
-): Promise<TenantAccess> {
+): Promise<WorkspaceTenantContext> {
   if (!Types.ObjectId.isValid(workspaceId)) {
     throw new AppError(404, "NOT_FOUND", "Workspace was not found");
   }
@@ -54,6 +58,7 @@ export async function requireWorkspaceAccess(
   return {
     userId,
     organisationId: String(membership.organisationId),
+    workspaceId,
     role: membership.role,
     workspaceIds: membership.workspaceIds.map(String)
   };

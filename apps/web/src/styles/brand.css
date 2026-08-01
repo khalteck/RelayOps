@@ -1,0 +1,38 @@
+.relay-logo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 44px;
+  font-size: 17px;
+  letter-spacing: -0.03em;
+}
+
+.relay-logo__mark {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.relay-logo__mark i {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #665cf6;
+}
+
+.relay-logo__mark i:first-child {
+  transform: translate(-8px, 7px);
+  background: #ef6b72;
+}
+
+.relay-logo__mark i:nth-child(2) {
+  transform: translate(8px, 7px);
+  background: #f3a953;
+}
+
+.relay-logo__mark i:last-child {
+  transform: translateY(-7px);
+}

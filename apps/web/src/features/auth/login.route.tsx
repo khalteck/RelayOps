@@ -2,12 +2,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginInputSchema, type LoginInput } from "@relayops/types";
 import { Alert, Button, Input } from "antd";
 import { Controller, useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthLayout } from "./auth-layout";
 import { useLogin } from "./auth.api";
 
 export function Component() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const login = useLogin();
   const {
     control,
@@ -15,7 +16,7 @@ export function Component() {
     formState: { errors }
   } = useForm<LoginInput>({
     resolver: zodResolver(loginInputSchema),
-    defaultValues: { email: "", password: "" }
+    defaultValues: { email: params.get("email") ?? "", password: "" }
   });
 
   const submit = handleSubmit(async (values) => {
@@ -30,6 +31,14 @@ export function Component() {
         <h2>Sign in to RelayOps</h2>
         <p>Return to your team’s operational workspace.</p>
       </div>
+      {params.get("invited") === "1" ? (
+        <Alert
+          type="success"
+          showIcon
+          message="Invitation accepted"
+          description="Sign in to open your new workspace."
+        />
+      ) : null}
       {login.error ? <Alert type="error" showIcon message={login.error.message} /> : null}
       <form className="form-stack" onSubmit={(event) => void submit(event)} noValidate>
         <label>

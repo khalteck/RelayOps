@@ -1,5 +1,10 @@
 import { Router, type Router as ExpressRouter } from "express";
-import { slaPolicySchema, tenantNameInputSchema } from "@relayops/types";
+import {
+  inviteMemberInputSchema,
+  slaPolicySchema,
+  tenantNameInputSchema,
+  type InviteMemberInput
+} from "@relayops/types";
 import { z } from "zod";
 import { requireCsrf } from "../../middleware/csrf.js";
 import { validateBody } from "../../middleware/validate.js";
@@ -10,6 +15,7 @@ import {
   updateOrganisation,
   updateWorkspace
 } from "./tenant.service.js";
+import { inviteMember, listInvitations, listOrganisationMembers } from "./invitation.service.js";
 
 const slaInput = z.object({ slaPolicy: slaPolicySchema });
 export const tenantRouter: ExpressRouter = Router();
@@ -24,6 +30,39 @@ tenantRouter.get("/", async (request, response) => {
     meta: { serverTime: new Date().toISOString() }
   });
 });
+
+tenantRouter.get("/:organisationId/members", async (request, response) => {
+  response.json({
+    data: await listOrganisationMembers(
+      request.auth!.id,
+      routeParam(request.params.organisationId!)
+    ),
+    meta: { serverTime: new Date().toISOString() }
+  });
+});
+
+tenantRouter.get("/:organisationId/invitations", async (request, response) => {
+  response.json({
+    data: await listInvitations(request.auth!.id, routeParam(request.params.organisationId!)),
+    meta: { serverTime: new Date().toISOString() }
+  });
+});
+
+tenantRouter.post(
+  "/:organisationId/invitations",
+  requireCsrf,
+  validateBody(inviteMemberInputSchema),
+  async (request, response) => {
+    response.status(201).json({
+      data: await inviteMember(
+        request.auth!.id,
+        routeParam(request.params.organisationId!),
+        request.body as InviteMemberInput
+      ),
+      meta: { serverTime: new Date().toISOString() }
+    });
+  }
+);
 
 tenantRouter.post(
   "/",

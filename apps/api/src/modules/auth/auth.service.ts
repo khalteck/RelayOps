@@ -1,6 +1,6 @@
 import { compare, hash } from "bcryptjs";
 import mongoose from "mongoose";
-import type { LoginInput, RegisterInput, SessionUser } from "@relayops/types";
+import type { LoginInput, RegisterInput, SessionUser, UpdateProfileInput } from "@relayops/types";
 import { DEFAULT_SLA_POLICY } from "@relayops/types";
 import { AppError } from "../../core/errors.js";
 import { uniqueSlug } from "../../core/slug.js";
@@ -161,4 +161,13 @@ export async function revokeRefreshToken(token?: string): Promise<void> {
   } catch {
     // Logout remains idempotent even when the browser holds an invalid token.
   }
+}
+
+export async function updateProfile(
+  userId: string,
+  input: UpdateProfileInput
+): Promise<SessionUser> {
+  const user = await UserModel.findByIdAndUpdate(userId, { name: input.name }, { new: true });
+  if (!user) throw new AppError(404, "NOT_FOUND", "Account was not found");
+  return toSessionUser(user);
 }

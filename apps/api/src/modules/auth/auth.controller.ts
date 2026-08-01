@@ -1,5 +1,10 @@
 import type { Request, Response } from "express";
-import type { LoginInput, RegisterInput, SessionPayload } from "@relayops/types";
+import type {
+  LoginInput,
+  RegisterInput,
+  SessionPayload,
+  UpdateProfileInput
+} from "@relayops/types";
 import {
   ACCESS_COOKIE,
   CSRF_COOKIE,
@@ -7,7 +12,13 @@ import {
   clearSessionCookies,
   setSessionCookies
 } from "./auth.cookies.js";
-import { login, register, revokeRefreshToken, rotateRefreshToken } from "./auth.service.js";
+import {
+  login,
+  register,
+  revokeRefreshToken,
+  rotateRefreshToken,
+  updateProfile
+} from "./auth.service.js";
 import { createCsrfToken } from "./auth.tokens.js";
 
 function fingerprint(request: Request): { userAgent?: string; ipAddress?: string } {
@@ -79,6 +90,13 @@ export async function logoutController(request: Request, response: Response): Pr
   await revokeRefreshToken(request.cookies[REFRESH_COOKIE] as string | undefined);
   clearSessionCookies(response);
   response.status(204).send();
+}
+
+export async function updateProfileController(request: Request, response: Response): Promise<void> {
+  response.json({
+    data: await updateProfile(request.auth!.id, request.body as UpdateProfileInput),
+    meta: { serverTime: new Date().toISOString() }
+  });
 }
 
 export function accessCookieName(): string {

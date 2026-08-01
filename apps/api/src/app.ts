@@ -11,8 +11,11 @@ import { authenticate } from "./middleware/authenticate.js";
 import { apiRateLimit } from "./middleware/rate-limits.js";
 import { requestContext } from "./middleware/request-context.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
+import { notificationRouter } from "./modules/notifications/notification.routes.js";
+import { invitationRouter } from "./modules/tenants/invitation.routes.js";
 import { realtimeRouter } from "./modules/realtime/realtime.routes.js";
 import { tenantRouter } from "./modules/tenants/tenant.routes.js";
+import { workspaceRouter } from "./modules/workspaces/workspace.routes.js";
 
 export function createApp(): Express {
   const app = express();
@@ -48,8 +51,11 @@ export function createApp(): Express {
   });
 
   app.use("/api/v1/auth", authRouter);
+  app.use("/api/v1/invitations", invitationRouter);
   app.use("/api/v1/organisations", authenticate, tenantRouter);
+  app.use("/api/v1/notifications", authenticate, notificationRouter);
   app.use("/api/v1/realtime", authenticate, realtimeRouter);
+  app.use("/api/v1/workspaces", authenticate, workspaceRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

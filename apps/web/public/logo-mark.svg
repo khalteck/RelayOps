@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-labelledby="title">
+  <title id="title">RelayOps logo mark</title>
+  <rect width="180" height="180" rx="38" fill="#24232b"/>
+  <path d="M58 111 90 59l32 52" fill="none" stroke="#ffffff" stroke-opacity=".16" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="58" cy="111" r="19" fill="#ef6b72"/>
+  <circle cx="122" cy="111" r="19" fill="#f3a953"/>
+  <circle cx="90" cy="59" r="19" fill="#665cf6"/>
+</svg>
