@@ -1,4 +1,5 @@
 import { rateLimit } from "express-rate-limit";
+import { getEnv } from "../config/env.js";
 
 export const apiRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -18,7 +19,7 @@ export const apiRateLimit = rateLimit({
 
 export const authRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 20,
+  limit: getEnv().AUTH_RATE_LIMIT,
   standardHeaders: "draft-8",
   legacyHeaders: false,
   handler: (request, response) => {

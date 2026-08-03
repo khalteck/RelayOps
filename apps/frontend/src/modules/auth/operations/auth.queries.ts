@@ -7,7 +7,7 @@ import {
 } from "@relayops/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/helpers/query-keys";
-import { apiRequest } from "@/services/api-client";
+import { ApiError, apiRequest } from "@/services/api-client";
 
 export function useSession() {
   return useQuery({
@@ -50,7 +50,15 @@ export function useRegister() {
 export function useLogout() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: () => apiRequest<void>("/api/v1/auth/logout", { method: "POST" }),
+    mutationFn: async () => {
+      try {
+        await apiRequest<void>("/api/v1/auth/logout", { method: "POST" });
+      } catch (error) {
+        // An unauthenticated response means the browser no longer has a usable
+        // session. Treat that state as signed out without exposing auth details.
+        if (!(error instanceof ApiError) || error.status !== 401) throw error;
+      }
+    },
     onSuccess: () => client.clear()
   });
 }

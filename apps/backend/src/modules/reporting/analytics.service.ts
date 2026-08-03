@@ -72,6 +72,8 @@ export async function analyticsOverview(
               $cond: [
                 {
                   $and: [
+                    { $ne: [{ $ifNull: ["$sla.acknowledgedAt", null] }, null] },
+                    { $ne: [{ $ifNull: ["$sla.resolvedAt", null] }, null] },
                     { $lte: ["$sla.acknowledgedAt", "$sla.acknowledgeDueAt"] },
                     { $lte: ["$sla.resolvedAt", "$sla.resolveDueAt"] }
                   ]
@@ -117,7 +119,7 @@ export async function analyticsOverview(
         : null,
       mttrMinutes: metrics?.resolved ? metrics.resolveDuration / metrics.resolved / 60_000 : null,
       slaCompliancePercent: metrics?.slaMeasured
-        ? (metrics.slaCompliant / metrics.slaMeasured) * 100
+        ? Math.min(100, (metrics.slaCompliant / metrics.slaMeasured) * 100)
         : null
     },
     trend: trendRows.map((row) => ({

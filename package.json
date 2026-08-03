@@ -9,24 +9,56 @@
   },
   "scripts": {
     "build": "pnpm -r --if-present build",
+    "build:analyze": "pnpm --filter @relayops/frontend build:analyze",
+    "ci": "pnpm run verify",
     "dev": "pnpm --parallel --filter @relayops/backend --filter @relayops/frontend dev",
+    "e2e:backend": "tsx e2e/support/backend-server.ts",
+    "e2e": "playwright test --project=chromium",
+    "e2e:smoke": "playwright test --grep @smoke --project=firefox --project=webkit",
+    "e2e:demo": "playwright test e2e/demo.spec.ts --project=demo",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings 0",
+    "prepare": "husky",
     "test": "pnpm --filter @relayops/types build && pnpm --filter @relayops/ui build && pnpm -r --if-present test",
+    "test:coverage": "pnpm --filter @relayops/types build && pnpm --filter @relayops/ui build && pnpm -r --if-present test:coverage",
+    "test:integration": "pnpm --filter @relayops/backend test:integration",
     "typecheck": "pnpm --filter @relayops/types build && pnpm --filter @relayops/ui build && pnpm -r --if-present typecheck",
-    "seed": "pnpm --filter @relayops/backend seed"
+    "seed": "pnpm --filter @relayops/backend seed",
+    "validate:render": "node --import tsx scripts/validate-render.ts",
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm test:integration && pnpm build && pnpm validate:render"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@eslint/js": "^9.32.0",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^24.1.0",
+    "@vitest/coverage-v8": "^3.2.7",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
+    "mongodb-memory-server": "^11.2.0",
     "prettier": "^3.6.2",
+    "tsx": "^4.23.1",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.38.0"
+    "typescript-eslint": "^8.38.0",
+    "yaml": "^2.9.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,mjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,html,json,md,yaml,yml}": "prettier --write"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "mongodb-memory-server"
+    ]
   }
 }

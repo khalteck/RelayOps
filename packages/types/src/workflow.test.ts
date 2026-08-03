@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canTransitionStatus, hasPermission } from "./index.js";
+import { canTransitionStatus, hasPermission, nextIncidentStatus, permissionsFor } from "./index.js";
 
 describe("incident workflow", () => {
   it("enforces the strict sequence", () => {
@@ -10,6 +10,11 @@ describe("incident workflow", () => {
   it("reserves reopening for privileged roles", () => {
     expect(canTransitionStatus("resolved", "investigating", "administrator")).toBe(true);
     expect(canTransitionStatus("resolved", "investigating", "responder")).toBe(false);
+  });
+
+  it("provides the next sequential state", () => {
+    expect(nextIncidentStatus("investigating")).toBe("monitoring");
+    expect(nextIncidentStatus("resolved")).toBeUndefined();
   });
 });
 
@@ -23,5 +28,10 @@ describe("role permissions", () => {
   it("reserves organisation member management for owners", () => {
     expect(hasPermission("owner", "members:manage")).toBe(true);
     expect(hasPermission("administrator", "members:manage")).toBe(false);
+  });
+
+  it("returns the complete role capability set", () => {
+    expect(permissionsFor("responder")).toContain("incident:claim");
+    expect(permissionsFor("viewer")).not.toContain("audit:read");
   });
 });

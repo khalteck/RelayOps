@@ -28,7 +28,7 @@ import {
 } from "antd";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
-import { useLogout, useSession } from "@/modules/auth";
+import { SignOutModal, useSession } from "@/modules/auth";
 import { useCreateOrganisation, useOrganisations } from "@/modules/organisations";
 import { RealtimeConnectionLabel, WorkspaceRealtimeProvider } from "@/modules/realtime";
 import { NotificationCenter } from "@/modules/notifications";
@@ -44,7 +44,6 @@ export function AppShell() {
   const screens = Grid.useBreakpoint();
   const organisations = useOrganisations();
   const session = useSession();
-  const logout = useLogout();
   const createOrganisation = useCreateOrganisation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
@@ -268,21 +267,14 @@ export function AppShell() {
                 />
               </label>
             </Modal>
-            <Modal
-              title="Sign out of RelayOps?"
+            <SignOutModal
               open={signOutOpen}
-              okText="Sign out"
-              okButtonProps={{ danger: true }}
-              confirmLoading={logout.isPending}
-              onOk={async () => {
-                await logout.mutateAsync();
+              onCancel={() => setSignOutOpen(false)}
+              onSignedOut={async () => {
                 setSignOutOpen(false);
                 await navigate("/login");
               }}
-              onCancel={() => setSignOutOpen(false)}
-            >
-              <p>You will need to sign in again to access your organisations and workspaces.</p>
-            </Modal>
+            />
           </Layout>
         </WorkspaceRealtimeProvider>
       ) : null}

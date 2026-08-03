@@ -329,6 +329,18 @@ input {
   border-radius: 20px;
 }
 
+.workspace-active-tag {
+  color: #0b634f;
+  background: #e7f5ef;
+  border-color: #a9d8c6;
+}
+
+:root[data-theme="dark"] .workspace-active-tag {
+  color: #78e0c0;
+  background: #1e382f;
+  border-color: #386b5a;
+}
+
 .profile-button {
   height: 42px;
   display: flex;

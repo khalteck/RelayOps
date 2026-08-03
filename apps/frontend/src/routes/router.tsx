@@ -1,4 +1,3 @@
-import { AppShell } from "@/components/app-shell";
 import {
   loadAcceptInviteView,
   loadLoginView,
@@ -10,6 +9,7 @@ import { loadDashboardView } from "@/modules/dashboard";
 import { loadIncidentsView } from "@/modules/incidents";
 import { loadSettingsView } from "@/modules/settings";
 import { Navigate, createBrowserRouter } from "react-router-dom";
+import { loadAppShell } from "./app-shell-route";
 import { RouteError } from "./route-error";
 
 export const router = createBrowserRouter([
@@ -25,7 +25,7 @@ export const router = createBrowserRouter([
           { index: true, lazy: () => import("./entry-route") },
           {
             path: "/app/:orgSlug/:workspaceSlug",
-            element: <AppShell />,
+            lazy: loadAppShell,
             children: [
               { path: "dashboard", lazy: loadDashboardView },
               { path: "overview", element: <Navigate to="../dashboard" replace /> },

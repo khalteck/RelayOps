@@ -7,7 +7,16 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["**/dist/**", "**/coverage/**", "**/node_modules/**", "apps/backend/vitest.config.ts"]
+    ignores: [
+      "**/dist/**",
+      "**/coverage/**",
+      "**/node_modules/**",
+      "**/playwright-report/**",
+      "**/test-results/**",
+      "apps/backend/vitest.config.ts",
+      "apps/backend/vitest.integration.config.ts",
+      "packages/types/vitest.config.ts"
+    ]
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -40,7 +49,7 @@ export default tseslint.config(
     }
   },
   {
-    files: ["apps/backend/**/*.ts"],
+    files: ["apps/backend/**/*.ts", "e2e/**/*.ts", "scripts/**/*.ts", "playwright.config.ts"],
     languageOptions: {
       globals: globals.node
     }

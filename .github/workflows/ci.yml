@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CI: true
+
+jobs:
+  quality:
+    name: Formatting, linting, and types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+
+  tests:
+    name: Unit, integration, and coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:coverage
+      - run: pnpm test:integration
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports
+          path: |
+            apps/backend/coverage
+            apps/frontend/coverage
+            packages/types/coverage
+          if-no-files-found: warn
+
+  build:
+    name: Production builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm build:analyze
+      - run: pnpm validate:render
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bundle-report
+          path: reports/bundle.html
+          if-no-files-found: error
+
+  e2e:
+    name: Playwright (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+      - if: matrix.browser == 'chromium'
+        run: pnpm exec playwright test --project=chromium
+      - if: matrix.browser == 'chromium'
+        run: pnpm e2e:demo
+      - if: matrix.browser != 'chromium'
+        run: pnpm exec playwright test --grep @smoke --project=${{ matrix.browser }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-${{ matrix.browser }}
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: warn
+
+  checks-passed:
+    name: Checks passed
+    if: always()
+    needs: [quality, tests, build, e2e]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every deployment check
+        run: |
+          test "${{ needs.quality.result }}" = "success"
+          test "${{ needs.tests.result }}" = "success"
+          test "${{ needs.build.result }}" = "success"
+          test "${{ needs.e2e.result }}" = "success"

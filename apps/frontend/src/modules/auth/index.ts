@@ -1,4 +1,5 @@
 export { ProtectedRoute } from "./components/protected-route";
+export { SignOutModal } from "./components/sign-out-modal";
 export {
   useLogin,
   useLogout,

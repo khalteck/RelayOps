@@ -25,12 +25,17 @@ export async function verifyAccessToken(token: string): Promise<string> {
 }
 
 export async function signRefreshToken(claims: RefreshClaims): Promise<string> {
-  return new SignJWT({ tokenType: "refresh", sessionId: claims.sessionId })
-    .setProtectedHeader({ alg: "HS256" })
-    .setSubject(claims.userId)
-    .setIssuedAt()
-    .setExpirationTime("7d")
-    .sign(encoder.encode(getEnv().REFRESH_TOKEN_SECRET));
+  return (
+    new SignJWT({ tokenType: "refresh", sessionId: claims.sessionId })
+      .setProtectedHeader({ alg: "HS256" })
+      .setSubject(claims.userId)
+      // Rotation can occur within the same JWT timestamp second. A unique ID
+      // guarantees the replacement token and its stored hash actually change.
+      .setJti(randomUUID())
+      .setIssuedAt()
+      .setExpirationTime("7d")
+      .sign(encoder.encode(getEnv().REFRESH_TOKEN_SECRET))
+  );
 }
 
 export async function verifyRefreshToken(token: string): Promise<RefreshClaims> {

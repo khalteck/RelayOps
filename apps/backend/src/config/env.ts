@@ -8,6 +8,7 @@ const envSchema = z.object({
   ACCESS_TOKEN_SECRET: z.string().min(32),
   REFRESH_TOKEN_SECRET: z.string().min(32),
   REALTIME_TICKET_SECRET: z.string().min(32),
+  AUTH_RATE_LIMIT: z.coerce.number().int().positive().default(20),
   DEMO_PASSWORD: z.string().min(12).optional(),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info")
 });

@@ -1,5 +1,16 @@
 import "@testing-library/jest-dom/vitest";
-import { vi } from "vitest";
+import { cleanup } from "@testing-library/react";
+import { toHaveNoViolations } from "jest-axe";
+import { afterAll, afterEach, beforeAll, expect, vi } from "vitest";
+import { testApiServer } from "./msw/server";
+
+expect.extend(toHaveNoViolations);
+beforeAll(() => testApiServer.listen({ onUnhandledRequest: "bypass" }));
+afterEach(() => {
+  cleanup();
+  testApiServer.resetHandlers();
+});
+afterAll(() => testApiServer.close());
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,

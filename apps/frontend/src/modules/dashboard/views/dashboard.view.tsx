@@ -13,7 +13,7 @@ export function Component() {
         eyebrow={`${organisation.name} / ${workspace.name}`}
         title="Dashboard"
         description="A focused view of current operating context and incident performance."
-        actions={<Tag color="green">Workspace active</Tag>}
+        actions={<Tag className="workspace-active-tag">Workspace active</Tag>}
       />
       <Card className="welcome-panel">
         <div className="welcome-panel__copy">
