@@ -7,7 +7,7 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["**/dist/**", "**/coverage/**", "**/node_modules/**", "apps/api/vitest.config.ts"]
+    ignores: ["**/dist/**", "**/coverage/**", "**/node_modules/**", "apps/backend/vitest.config.ts"]
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -26,7 +26,7 @@ export default tseslint.config(
     }
   },
   {
-    files: ["apps/web/**/*.{ts,tsx}", "packages/ui/**/*.{ts,tsx}"],
+    files: ["apps/frontend/**/*.{ts,tsx}", "packages/ui/**/*.{ts,tsx}"],
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh
@@ -40,7 +40,7 @@ export default tseslint.config(
     }
   },
   {
-    files: ["apps/api/**/*.ts"],
+    files: ["apps/backend/**/*.ts"],
     languageOptions: {
       globals: globals.node
     }

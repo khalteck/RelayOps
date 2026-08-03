@@ -9,13 +9,13 @@
   },
   "scripts": {
     "build": "pnpm -r --if-present build",
-    "dev": "pnpm --parallel --filter @relayops/api --filter @relayops/web dev",
+    "dev": "pnpm --parallel --filter @relayops/backend --filter @relayops/frontend dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings 0",
     "test": "pnpm --filter @relayops/types build && pnpm --filter @relayops/ui build && pnpm -r --if-present test",
     "typecheck": "pnpm --filter @relayops/types build && pnpm --filter @relayops/ui build && pnpm -r --if-present typecheck",
-    "seed": "pnpm --filter @relayops/api seed"
+    "seed": "pnpm --filter @relayops/backend seed"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",

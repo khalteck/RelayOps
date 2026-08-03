@@ -14,11 +14,16 @@ flowchart LR
 
 ## Runtime boundaries
 
-- `apps/web` renders routes, owns interaction state, and consumes shared API contracts.
-- `apps/api` owns authentication, authorization, validation, persistence, and realtime rooms.
+- `apps/frontend` renders routes, owns interaction state, and consumes shared API contracts.
+- `apps/backend` owns authentication, authorization, validation, persistence, and realtime rooms.
 - `packages/types` contains transport-safe Zod schemas and capability names. Mongoose models remain
   private to the API.
 - `packages/ui` centralises design tokens and cross-feature visual primitives.
+
+Frontend route configuration lives in `apps/frontend/src/routes`. Vertical modules expose a single
+`index.ts`, keep route pages in `views`, module UI in `components`, and all TanStack Query definitions
+in `operations`. Module barrels expose dynamic view loaders so the public module boundary does not
+collapse route-level code splitting.
 
 HTTP calls use the same-origin `/api` path through Render's Static Site rewrite. Socket.IO connects
 to the API host directly. The frontend first exchanges its cookie-authenticated HTTP session for a

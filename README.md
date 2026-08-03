@@ -62,13 +62,29 @@ primitives; Tailwind and a small CSS layer handle responsive composition and pro
 ## 9. Repository structure
 
 ```text
-apps/web        React/Vite client
-apps/api        Express/Mongoose/Socket.IO service
+apps/frontend   React/Vite client
+apps/backend    Express/Mongoose/Socket.IO service
 packages/ui     Shared visual primitives and tokens
 packages/types  Shared contracts, enums, and permissions
 packages/config Shared tooling foundations
 docs            Architecture, schema, and decision records
 ```
+
+The frontend uses explicit shared layers and vertical modules:
+
+```text
+apps/frontend/src
+├── components, hooks, helpers, routes, services, stores, styles, test, types
+└── modules
+    └── <module>
+        ├── components   Module-owned interface pieces
+        ├── operations   TanStack queries, mutations, and data operations
+        ├── views        Lazy route pages
+        └── index.ts     Supported cross-module interface
+```
+
+Only used module folders are created. Cross-module imports pass through `index.ts`; module-internal
+imports remain relative, while shared-layer imports use the `@/` source alias.
 
 ## 10. Authentication and authorization model
 
@@ -94,21 +110,21 @@ realtime flows, axe checks, and deployment smoke tests.
 
 1. Use Node 24 and enable Corepack.
 2. Run `pnpm install` from the repository root.
-3. Copy `apps/api/.env.example` to `apps/api/.env`.
-4. Copy `apps/web/.env.example` to `apps/web/.env`.
+3. Copy `apps/backend/.env.example` to `apps/backend/.env`.
+4. Copy `apps/frontend/.env.example` to `apps/frontend/.env`.
 5. Point `MONGODB_URI` at an Atlas database or MongoDB replica set.
 6. Run `pnpm dev` from the repository root.
 7. Open `http://localhost:5175`.
 
-The API development and seed scripts load `apps/api/.env` explicitly. When running a root script
-from inside a workspace such as `apps/web`, use the workspace-root flag: `pnpm -w seed` or
+The backend development and seed scripts load `apps/backend/.env` explicitly. When running a root
+script from inside a workspace such as `apps/frontend`, use the workspace-root flag: `pnpm -w seed` or
 `pnpm -w dev`.
 
 Useful checks: `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build`.
 
 Review locally
 
-Configure `apps/api/.env`, then run:
+Configure `apps/backend/.env`, then run:
 
 `pnpm seed`
 `pnpm dev`
