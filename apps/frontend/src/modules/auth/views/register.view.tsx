@@ -1,45 +1,42 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerInputSchema, type RegisterInput } from "@relayops/types";
+import { registerStartInputSchema, type RegisterStartInput } from "@relayops/types";
 import { Alert, Button, Input } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthLayout } from "../components/auth-layout";
-import { useRegister } from "../operations/auth.queries";
+import { useStartRegistration } from "../operations/auth.queries";
 
 const fields: Array<{
-  name: keyof RegisterInput;
+  name: keyof RegisterStartInput;
   label: string;
   autoComplete: string;
   type?: "password" | "email";
 }> = [
   { name: "name", label: "Your name", autoComplete: "name" },
   { name: "email", label: "Work email", autoComplete: "email", type: "email" },
-  { name: "password", label: "Password", autoComplete: "new-password", type: "password" },
-  { name: "organisationName", label: "Organisation", autoComplete: "organization" },
-  { name: "workspaceName", label: "First workspace", autoComplete: "off" }
+  { name: "password", label: "Password", autoComplete: "new-password", type: "password" }
 ];
 
 export function Component() {
   const navigate = useNavigate();
-  const register = useRegister();
+  const register = useStartRegistration();
   const {
     control,
     handleSubmit,
     formState: { errors }
-  } = useForm<RegisterInput>({
-    resolver: zodResolver(registerInputSchema),
+  } = useForm<RegisterStartInput>({
+    resolver: zodResolver(registerStartInputSchema),
     defaultValues: {
       name: "",
       email: "",
-      password: "",
-      organisationName: "",
-      workspaceName: ""
+      password: ""
     }
   });
 
   const submit = handleSubmit(async (values) => {
-    await register.mutateAsync(values);
-    await navigate("/");
+    const result = await register.mutateAsync(values);
+    sessionStorage.setItem("relayops-registration", JSON.stringify(result.data));
+    await navigate("/verify-email");
   });
 
   return (
@@ -47,7 +44,7 @@ export function Component() {
       <div className="auth-card__heading">
         <span>Start responding</span>
         <h2>Create your operations hub</h2>
-        <p>Your first organisation and workspace are created with you as owner.</p>
+        <p>Verify your work email first, then shape your organisation and workspace.</p>
       </div>
       {register.error ? <Alert type="error" showIcon message={register.error.message} /> : null}
       <form
@@ -80,7 +77,7 @@ export function Component() {
           </label>
         ))}
         <Button htmlType="submit" type="primary" size="large" block loading={register.isPending}>
-          Create workspace
+          Continue with email
         </Button>
       </form>
       <p className="auth-card__footer">

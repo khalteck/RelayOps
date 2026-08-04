@@ -76,7 +76,34 @@ sequenceDiagram
 Mongoose documents never cross the transport boundary. Repository and service functions require
 explicit tenant identifiers so workspace access cannot be inferred from client input alone.
 
-## Authentication, refresh, and logout
+## Authentication, verification, refresh, and logout
+
+Owner signup stores a hashed, ten-minute verification code in a 24-hour challenge. The code is
+delivered from an encrypted outbox, and a user/session is created only after verification. Session
+restoration includes an explicit onboarding state so abandoned owners and invited members resume at
+the correct protected route.
+
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant API
+    participant Mongo
+    participant Resend
+    Browser->>API: Start owner registration
+    API->>Mongo: Hashed code + encrypted email job
+    API->>Resend: Verification email
+    Browser->>API: Submit six-digit code
+    API->>Mongo: Create verified user
+    API-->>Browser: Secure session + onboarding state
+    Browser->>API: Complete tenant onboarding
+    API->>Mongo: Tenant + owner + SLA + audit transaction
+```
+
+Resend is behind a provider-neutral transport; CI uses an in-memory adapter. Provider webhooks use
+the raw request body and signature verification. Membership authorization accepts only `active`
+memberships. Invitation acceptance creates `pending_onboarding`; suspension retains history while
+blocking access, and removal deletes only the membership. Owner lifecycle actions are audited,
+emailed, and broadcast as realtime access changes.
 
 ```mermaid
 sequenceDiagram
@@ -188,6 +215,7 @@ application unless a shared package, root manifest, workspace file, or lockfile 
 
 - One assignee keeps the operational model focused.
 - Live aggregation avoids premature background analytics infrastructure.
-- Invitations are manually shared; outbound email remains outside v1.
+- Transactional email covers verification, invitations, suspension, restoration, and removal;
+  operational incident email remains intentionally outside v1.
 - The demo seed is deterministic and isolated from normal tenant creation.
 - AI summarization remains deferred until the non-AI platform is deployed and reviewed.

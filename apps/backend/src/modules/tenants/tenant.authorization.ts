@@ -23,7 +23,11 @@ export async function requireOrganisationAccess(
   if (!Types.ObjectId.isValid(organisationId)) {
     throw new AppError(404, "NOT_FOUND", "Organisation was not found");
   }
-  const membership = await MembershipModel.findOne({ userId, organisationId }).lean();
+  const membership = await MembershipModel.findOne({
+    userId,
+    organisationId,
+    status: "active"
+  }).lean();
   if (!membership) throw new AppError(404, "NOT_FOUND", "Organisation was not found");
   if (permission && !hasPermission(membership.role, permission)) {
     throw new AppError(403, "FORBIDDEN", "Your role cannot perform this action");
@@ -49,6 +53,7 @@ export async function requireWorkspaceAccess(
   const membership = await MembershipModel.findOne({
     userId,
     organisationId: workspace.organisationId,
+    status: "active",
     $or: [{ role: { $in: ["owner", "administrator"] } }, { workspaceIds: workspaceId }]
   }).lean();
   if (!membership) throw new AppError(404, "NOT_FOUND", "Workspace was not found");

@@ -10,7 +10,8 @@
     "sourceMap": true,
     "declaration": true,
     "composite": true,
-    "types": ["node"]
+    "types": ["node"],
+    "jsx": "react-jsx"
   },
   "references": [{ "path": "../../packages/types" }],
   "include": ["src"]

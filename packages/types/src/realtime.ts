@@ -5,7 +5,8 @@ export const REALTIME_EVENT_NAMES = [
   "incident.created",
   "incident.updated",
   "timeline.created",
-  "notification.created"
+  "notification.created",
+  "membership.access_changed"
 ] as const;
 export type RealtimeEventName = (typeof REALTIME_EVENT_NAMES)[number];
 
@@ -14,6 +15,10 @@ export interface ServerToClientEvents {
   "incident.updated": (incident: IncidentDto) => void;
   "timeline.created": (entry: TimelineEntryDto & { revision: number }) => void;
   "notification.created": (notification: NotificationDto) => void;
+  "membership.access_changed": (event: {
+    organisationId: string;
+    status: "active" | "suspended" | "removed";
+  }) => void;
 }
 
 export interface ClientToServerEvents {

@@ -11,6 +11,8 @@ import { authenticate } from "./middleware/authenticate.js";
 import { apiRateLimit } from "./middleware/rate-limits.js";
 import { requestContext } from "./middleware/request-context.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
+import { emailWebhookRouter } from "./modules/email/email.routes.js";
+import { capturedEmails } from "./modules/email/email.transport.js";
 import { notificationRouter } from "./modules/notifications/notification.routes.js";
 import { invitationRouter } from "./modules/tenants/invitation.routes.js";
 import { realtimeRouter } from "./modules/realtime/realtime.routes.js";
@@ -36,9 +38,18 @@ export function createApp(): Express {
       allowedHeaders: ["content-type", "x-csrf-token", "x-request-id"]
     })
   );
+  app.use("/api/v1/webhooks", emailWebhookRouter);
   app.use(express.json({ limit: "1mb" }));
   app.use(cookieParser());
   app.use("/api", apiRateLimit);
+
+  if (getEnv().NODE_ENV === "test") {
+    app.get("/api/v1/test/emails/latest", (request, response) => {
+      const recipient = String(request.query.to ?? "").toLowerCase();
+      const email = [...capturedEmails].reverse().find((item) => item.to === recipient);
+      response.json({ data: email ?? null, meta: { serverTime: new Date().toISOString() } });
+    });
+  }
 
   app.get("/health/live", (_request, response) => {
     response.json({ status: "ok" });

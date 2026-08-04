@@ -2,6 +2,7 @@ import type { IncidentDto, NotificationDto, NotificationKind } from "@relayops/t
 import { NotificationModel, type NotificationDocument } from "../../models/notification.model.js";
 import { OrganisationModel } from "../../models/organisation.model.js";
 import { WorkspaceModel } from "../../models/workspace.model.js";
+import { UserModel } from "../../models/user.model.js";
 import { publishUserEvent } from "../realtime/realtime.publisher.js";
 
 export function notificationDto(
@@ -85,8 +86,16 @@ export async function notifyIncidentParticipants(
     incident_commented: "New incident comment"
   };
   await Promise.all(
-    [...recipientIds].map((userId) =>
-      createNotification({
+    [...recipientIds].map(async (userId) => {
+      const user = await UserModel.findById(userId).select("preferences").lean();
+      const preferenceKey =
+        kind === "incident_assigned"
+          ? "incidentAssigned"
+          : kind === "incident_commented"
+            ? "incidentCommented"
+            : "incidentUpdated";
+      if (user?.preferences?.inApp?.[preferenceKey] === false) return;
+      return createNotification({
         userId,
         kind,
         title: titles[kind],
@@ -94,7 +103,7 @@ export async function notifyIncidentParticipants(
         organisationId: incident.organisationId,
         workspaceId: incident.workspaceId,
         ...(resourcePath ? { resourcePath } : {})
-      })
-    )
+      });
+    })
   );
 }

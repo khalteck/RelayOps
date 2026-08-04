@@ -2,6 +2,9 @@ import {
   loadAcceptInviteView,
   loadLoginView,
   loadRegisterView,
+  loadVerifyEmailView,
+  loadOwnerOnboardingView,
+  loadInvitedOnboardingView,
   ProtectedRoute
 } from "@/modules/auth";
 import { loadAuditLogView } from "@/modules/audit-log";
@@ -18,10 +21,13 @@ export const router = createBrowserRouter([
     children: [
       { path: "/login", lazy: loadLoginView },
       { path: "/register", lazy: loadRegisterView },
+      { path: "/verify-email", lazy: loadVerifyEmailView },
       { path: "/accept-invite/:token", lazy: loadAcceptInviteView },
       {
         element: <ProtectedRoute />,
         children: [
+          { path: "/onboarding/owner", lazy: loadOwnerOnboardingView },
+          { path: "/onboarding/member", lazy: loadInvitedOnboardingView },
           { index: true, lazy: () => import("./entry-route") },
           {
             path: "/app/:orgSlug/:workspaceSlug",

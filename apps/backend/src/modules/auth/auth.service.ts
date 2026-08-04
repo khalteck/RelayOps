@@ -23,10 +23,22 @@ interface AuthResult {
 }
 
 function toSessionUser(user: { _id: unknown; name: string; email: string }): SessionUser {
-  return { id: String(user._id), name: user.name, email: user.email };
+  const preferences =
+    "preferences" in user
+      ? (user as { preferences?: SessionUser["preferences"] }).preferences
+      : undefined;
+  return {
+    id: String(user._id),
+    name: user.name,
+    email: user.email,
+    preferences: preferences ?? {
+      theme: "system",
+      inApp: { incidentAssigned: true, incidentUpdated: true, incidentCommented: true }
+    }
+  };
 }
 
-async function issueSession(
+export async function issueSession(
   user: { _id: unknown; name: string; email: string },
   fingerprint: RequestFingerprint
 ): Promise<AuthResult> {
@@ -168,6 +180,15 @@ export async function updateProfile(
   input: UpdateProfileInput
 ): Promise<SessionUser> {
   const user = await UserModel.findByIdAndUpdate(userId, { name: input.name }, { new: true });
+  if (!user) throw new AppError(404, "NOT_FOUND", "Account was not found");
+  return toSessionUser(user);
+}
+
+export async function updatePreferences(
+  userId: string,
+  preferences: SessionUser["preferences"]
+): Promise<SessionUser> {
+  const user = await UserModel.findByIdAndUpdate(userId, { preferences }, { new: true });
   if (!user) throw new AppError(404, "NOT_FOUND", "Account was not found");
   return toSessionUser(user);
 }

@@ -17,5 +17,16 @@ export function ProtectedRoute() {
   if (session.isError) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
+  const onboarding = session.data?.onboarding;
+  const isOnboardingRoute = location.pathname.startsWith("/onboarding/");
+  if (onboarding?.required && !isOnboardingRoute) {
+    return (
+      <Navigate
+        to={onboarding.kind === "owner" ? "/onboarding/owner" : "/onboarding/member"}
+        replace
+      />
+    );
+  }
+  if (onboarding && !onboarding.required && isOnboardingRoute) return <Navigate to="/" replace />;
   return <Outlet />;
 }

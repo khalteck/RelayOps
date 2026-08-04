@@ -12,7 +12,15 @@ export async function authenticate(request: Request, _response: Response, next: 
     const userId = await verifyAccessToken(token);
     const user = await UserModel.findById(userId).lean();
     if (!user) throw new Error("User not found");
-    request.auth = { id: String(user._id), name: user.name, email: user.email };
+    request.auth = {
+      id: String(user._id),
+      name: user.name,
+      email: user.email,
+      preferences: user.preferences ?? {
+        theme: "system",
+        inApp: { incidentAssigned: true, incidentUpdated: true, incidentCommented: true }
+      }
+    };
     next();
   } catch {
     throw new AppError(401, "UNAUTHENTICATED", "Session has expired");

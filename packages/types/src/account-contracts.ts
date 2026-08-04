@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { ROLES, type Role } from "./enums.js";
 import type { WorkspaceSummary } from "./contracts.js";
+import { accountPreferencesSchema } from "./contracts.js";
 
 export const updateProfileInputSchema = z.object({
   name: z.string().trim().min(2).max(80)
@@ -17,15 +18,36 @@ export const acceptInvitationInputSchema = z.object({
   password: z.string().min(12).max(128).optional()
 });
 
+export const ownerOnboardingInputSchema = z.object({
+  organisationName: z.string().trim().min(2).max(100),
+  workspaceName: z.string().trim().min(2).max(100),
+  preferences: accountPreferencesSchema
+});
+
+export const invitedOnboardingInputSchema = z.object({
+  name: z.string().trim().min(2).max(80),
+  preferences: accountPreferencesSchema
+});
+
+export const membershipStatusInputSchema = z.object({
+  status: z.enum(["active", "suspended"])
+});
+
 export type UpdateProfileInput = z.infer<typeof updateProfileInputSchema>;
 export type InviteMemberInput = z.infer<typeof inviteMemberInputSchema>;
 export type AcceptInvitationInput = z.infer<typeof acceptInvitationInputSchema>;
+export type OwnerOnboardingInput = z.infer<typeof ownerOnboardingInputSchema>;
+export type InvitedOnboardingInput = z.infer<typeof invitedOnboardingInputSchema>;
+export type MembershipStatusInput = z.infer<typeof membershipStatusInputSchema>;
+
+export type MembershipStatus = "pending_onboarding" | "active" | "suspended";
 
 export interface OrganisationMemberDto {
   membershipId: string;
   user: { id: string; name: string; email: string };
   role: Role;
   workspaceIds: string[];
+  status: MembershipStatus;
   joinedAt: string;
 }
 
@@ -38,7 +60,7 @@ export interface InvitationDto {
   status: "pending" | "accepted" | "expired";
   expiresAt: string;
   createdAt: string;
-  acceptUrl?: string;
+  deliveryStatus: "queued" | "sent" | "delivered" | "failed" | "bounced";
 }
 
 export interface InvitationPreviewDto {
@@ -49,6 +71,10 @@ export interface InvitationPreviewDto {
   invitedByName: string;
   expiresAt: string;
   accountExists: boolean;
+}
+
+export interface OnboardingDestinationDto {
+  destinationPath: string;
 }
 
 export const NOTIFICATION_KINDS = [

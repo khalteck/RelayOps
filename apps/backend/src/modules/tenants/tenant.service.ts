@@ -30,7 +30,7 @@ function workspaceDto(workspace: {
 }
 
 export async function listOrganisations(userId: string): Promise<OrganisationSummary[]> {
-  const memberships = await MembershipModel.find({ userId }).lean();
+  const memberships = await MembershipModel.find({ userId, status: "active" }).lean();
   const organisations = await OrganisationModel.find({
     _id: { $in: memberships.map((membership) => membership.organisationId) }
   }).lean();

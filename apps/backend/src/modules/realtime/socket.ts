@@ -31,7 +31,10 @@ export function createSocketServer(server: HttpServer) {
 
   io.on("connection", async (socket) => {
     socket.join(`user:${socket.data.userId}`);
-    const memberships = await MembershipModel.find({ userId: socket.data.userId }).lean();
+    const memberships = await MembershipModel.find({
+      userId: socket.data.userId,
+      status: "active"
+    }).lean();
     for (const membership of memberships) {
       socket.join(`organisation:${String(membership.organisationId)}`);
       const workspaceIds = ["owner", "administrator"].includes(membership.role)

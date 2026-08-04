@@ -22,16 +22,22 @@ erDiagram
 
 ## Collections
 
-- `users`: normalized unique email, display name, selected password hash.
+- `users`: normalized unique email, display name, selected password hash, verification timestamp,
+  and cross-device account preferences.
 - `refreshsessions`: hashed rotating token, expiry, revocation, and request fingerprint.
 - `organisations`: immutable unique slug and editable display name.
-- `memberships`: unique user/organisation pair, organisation role, allowed workspace IDs.
+- `memberships`: unique user/organisation pair, organisation role, allowed workspace IDs, and
+  pending-onboarding/active/suspended lifecycle state.
 - `workspaces`: organisation scope, immutable per-organisation slug, editable SLA policy.
 - `incidents`: tenant scope, reported time, classification, assignment, SLA snapshot, and monotonic revision.
 - `timelineentries`: immutable, cursor-sortable incident collaboration history.
 - `auditevents`: immutable organisation-scoped mutation record with request correlation.
 - `savedviews`: private user/workspace filter, sort, page-size, and visible-column definitions.
 - `invitations`: hashed seven-day token, organisation role, workspace scope, inviter, and acceptance state.
+- `pending_signups`: hashed ten-minute codes, attempt/cooldown counters, encrypted-email linkage,
+  and a 24-hour TTL.
+- `email_deliveries`: encrypted template payload, idempotency key, bounded retry state, provider ID,
+  and signed-webhook delivery outcome.
 - `notifications`: account-scoped operational message, read state, and optional resource path.
 
 Incident list indexes begin with workspace scope. Timeline and audit indexes end with descending

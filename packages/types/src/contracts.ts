@@ -36,11 +36,21 @@ export const loginInputSchema = z.object({
   password: z.string().min(12).max(128)
 });
 
-export const registerInputSchema = loginInputSchema.extend({
-  name: z.string().trim().min(2).max(80),
+export const registerStartInputSchema = loginInputSchema.extend({
+  name: z.string().trim().min(2).max(80)
+});
+
+export const registerInputSchema = registerStartInputSchema.extend({
   organisationName: z.string().trim().min(2).max(100),
   workspaceName: z.string().trim().min(2).max(100)
 });
+
+export const verifyRegistrationInputSchema = z.object({
+  challengeId: z.string().min(1),
+  code: z.string().regex(/^\d{6}$/)
+});
+
+export const resendRegistrationInputSchema = z.object({ challengeId: z.string().min(1) });
 
 export const tenantNameInputSchema = z.object({
   name: z.string().trim().min(2).max(100)
@@ -60,12 +70,56 @@ export const slaPolicySchema = z.object(
 
 export type LoginInput = z.infer<typeof loginInputSchema>;
 export type RegisterInput = z.infer<typeof registerInputSchema>;
+export type RegisterStartInput = z.infer<typeof registerStartInputSchema>;
+export type VerifyRegistrationInput = z.infer<typeof verifyRegistrationInputSchema>;
+export type ResendRegistrationInput = z.infer<typeof resendRegistrationInputSchema>;
 export type SlaPolicy = z.infer<typeof slaPolicySchema>;
 
 export interface SessionUser {
   id: string;
   name: string;
   email: string;
+  preferences: AccountPreferences;
+}
+
+export const THEME_PREFERENCES = ["system", "light", "dark"] as const;
+export type ThemePreference = (typeof THEME_PREFERENCES)[number];
+
+export interface AccountPreferences {
+  theme: ThemePreference;
+  inApp: {
+    incidentAssigned: boolean;
+    incidentUpdated: boolean;
+    incidentCommented: boolean;
+  };
+}
+
+export const accountPreferencesSchema = z.object({
+  theme: z.enum(THEME_PREFERENCES),
+  inApp: z.object({
+    incidentAssigned: z.boolean(),
+    incidentUpdated: z.boolean(),
+    incidentCommented: z.boolean()
+  })
+});
+
+export type OnboardingState =
+  | { required: false }
+  | { required: true; kind: "owner" }
+  | {
+      required: true;
+      kind: "invited";
+      membershipId: string;
+      organisationName: string;
+      role: Role;
+      workspaceNames: string[];
+    };
+
+export interface RegistrationChallengeDto {
+  challengeId: string;
+  maskedEmail: string;
+  expiresAt: string;
+  resendAvailableAt: string;
 }
 
 export interface WorkspaceSummary {
@@ -88,4 +142,5 @@ export interface OrganisationSummary {
 export interface SessionPayload {
   user: SessionUser;
   csrfToken: string;
+  onboarding: OnboardingState;
 }

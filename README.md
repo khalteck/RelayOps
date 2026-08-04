@@ -188,6 +188,11 @@ run root commands with `pnpm -w`, such as `pnpm -w seed`.
 | `REFRESH_TOKEN_SECRET`   | Backend           | Refresh-token signing                 |
 | `REALTIME_TICKET_SECRET` | Backend           | 60-second Socket.IO ticket signing    |
 | `AUTH_RATE_LIMIT`        | Backend           | 15-minute auth limit (default 20)     |
+| `EMAIL_PROVIDER`         | Backend           | `memory` locally/CI or `resend`       |
+| `EMAIL_FROM`             | Backend           | Verified transactional sender         |
+| `RESEND_API_KEY`         | Backend           | Resend sending credential             |
+| `RESEND_WEBHOOK_SECRET`  | Backend           | Delivery webhook verification         |
+| `EMAIL_PAYLOAD_SECRET`   | Backend           | Encrypted outbox payload key          |
 | `DEMO_PASSWORD`          | Backend           | Explicit demo-seed password           |
 | `LOG_LEVEL`              | Backend           | Structured log threshold              |
 | `VITE_SOCKET_URL`        | Frontend          | Direct Render backend URL             |
@@ -198,7 +203,8 @@ Never commit `.env` files, Atlas credentials, browser storage state, or generate
 ## 15. Known trade-offs
 
 V1 uses one assignee, private saved views, live aggregation, and a text affected-service field.
-Invitation links are shared manually because outbound email is deferred. The tracked coverage gates
+Transactional account email uses Resend for owner verification, invitations, and membership
+lifecycle notices. Sensitive outbox payloads are encrypted and delivery webhooks are signed. The tracked coverage gates
 focus on critical production logic rather than claiming full line coverage for route composition.
 Account recovery, tenant deletion, attachments, integrations, shared saved views, notifications
 outside the app, and a formal service catalogue are intentionally deferred.
@@ -207,6 +213,6 @@ outside the app, and a formal service catalogue are intentionally deferred.
 
 After deployment approval: configure Render/Atlas secrets, run the one-time idempotent seed, verify
 the public `/api` rewrite, cookies, CSRF, Socket.IO, SPA deep links, health checks, and CI-gated
-deployments, then replace the pending link above with verified live URLs. Email delivery,
-attachments, integrations, and a service catalogue remain post-v1 candidates. AI summarization is
+deployments, then replace the pending link above with verified live URLs. The exact handoff is in
+[the production deployment gate](docs/deployment.md). Attachments, integrations, and a service catalogue remain post-v1 candidates. AI summarization is
 considered only after the core platform and public deployment are separately approved and stable.

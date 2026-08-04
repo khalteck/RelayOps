@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { hash } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import type {
   AcceptInvitationInput,
   InvitationDto,
@@ -18,6 +18,7 @@ import { OrganisationModel } from "../../models/organisation.model.js";
 import { UserModel } from "../../models/user.model.js";
 import { WorkspaceModel } from "../../models/workspace.model.js";
 import { createNotification } from "../notifications/notification.service.js";
+import { queueEmail } from "../email/email.service.js";
 import { requireOrganisationAccess } from "./tenant.authorization.js";
 
 function tokenHash(token: string): string {
@@ -33,8 +34,7 @@ function invitationStatus(
 
 function toInvitation(
   invitation: InvitationDocument & { _id: unknown },
-  inviter: PersonSummary,
-  acceptUrl?: string
+  inviter: PersonSummary
 ): InvitationDto {
   return {
     id: String(invitation._id),
@@ -45,7 +45,7 @@ function toInvitation(
     status: invitationStatus(invitation),
     expiresAt: invitation.expiresAt.toISOString(),
     createdAt: invitation.createdAt.toISOString(),
-    ...(acceptUrl ? { acceptUrl } : {})
+    deliveryStatus: invitation.deliveryStatus
   };
 }
 
@@ -84,6 +84,7 @@ export async function listOrganisationMembers(
             user: { id: String(user._id), name: user.name, email: user.email },
             role: membership.role,
             workspaceIds: membership.workspaceIds.map(String),
+            status: membership.status ?? "active",
             joinedAt: membership.createdAt.toISOString()
           }
         ]
@@ -153,11 +154,71 @@ export async function inviteMember(
   });
   const inviter = await UserModel.findById(userId).select("name email").lean();
   if (!inviter) throw new AppError(404, "NOT_FOUND", "Inviting user was not found");
-  return toInvitation(
-    invitation,
-    { id: String(inviter._id), name: inviter.name, email: inviter.email },
-    `${getEnv().WEB_ORIGIN}/accept-invite/${token}`
-  );
+  const organisation = await OrganisationModel.findById(organisationId).select("name").lean();
+  const delivery = await queueEmail({
+    kind: "invitation",
+    to: input.email,
+    idempotencyKey: `invitation:${String(invitation._id)}:1`,
+    payload: {
+      recipientName: input.email.split("@")[0] ?? "there",
+      title: `You’re invited to ${organisation?.name ?? "RelayOps"}`,
+      intro: `${inviter.name} invited you to join as a ${input.role}.`,
+      actionLabel: "View invitation",
+      actionUrl: `${getEnv().WEB_ORIGIN}/accept-invite/${token}`,
+      detail: "This one-time invitation expires in seven days."
+    }
+  });
+  invitation.deliveryStatus = delivery?.status ?? "failed";
+  await invitation.save();
+  return toInvitation(invitation, {
+    id: String(inviter._id),
+    name: inviter.name,
+    email: inviter.email
+  });
+}
+
+export async function resendInvitation(
+  userId: string,
+  organisationId: string,
+  invitationId: string
+): Promise<InvitationDto> {
+  await requireOrganisationAccess(userId, organisationId, "members:manage");
+  const invitation = await InvitationModel.findOne({
+    _id: invitationId,
+    organisationId,
+    acceptedAt: { $exists: false }
+  });
+  if (!invitation) throw new AppError(404, "NOT_FOUND", "Invitation was not found");
+  const [inviter, organisation] = await Promise.all([
+    UserModel.findById(userId).select("name email").lean(),
+    OrganisationModel.findById(organisationId).select("name").lean()
+  ]);
+  if (!inviter || !organisation) throw new AppError(404, "NOT_FOUND", "Invitation was not found");
+  const token = randomBytes(32).toString("base64url");
+  invitation.tokenHash = tokenHash(token);
+  invitation.expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1_000);
+  invitation.deliveryStatus = "queued";
+  await invitation.save();
+  const delivery = await queueEmail({
+    kind: "invitation",
+    to: invitation.email,
+    idempotencyKey: `invitation:${String(invitation._id)}:${invitation.updatedAt.getTime()}`,
+    payload: {
+      recipientName: invitation.email.split("@")[0] ?? "there",
+      title: `Reminder: join ${organisation.name}`,
+      intro: `${inviter.name} renewed your RelayOps invitation as a ${invitation.role}.`,
+      actionLabel: "View invitation",
+      actionUrl: `${getEnv().WEB_ORIGIN}/accept-invite/${token}`,
+      detail: "This new link expires in seven days; previous links no longer work."
+    }
+  });
+  invitation.deliveryStatus = delivery?.status ?? "failed";
+  await invitation.save();
+  return toInvitation(invitation, {
+    id: String(inviter._id),
+    name: inviter.name,
+    email: inviter.email
+  });
 }
 
 async function findInvitation(token: string) {
@@ -200,9 +261,14 @@ export async function acceptInvitation(
   requestId?: string
 ): Promise<{ email: string }> {
   const invitation = await findInvitation(token);
-  let user = await UserModel.findOne({ email: invitation.email }).select("_id name email");
+  let user = await UserModel.findOne({ email: invitation.email }).select(
+    "_id name email +passwordHash"
+  );
   if (!user && (!input.name || !input.password)) {
     throw new AppError(400, "VALIDATION_ERROR", "Name and password are required for a new account");
+  }
+  if (user && (!input.password || !(await compare(input.password, user.passwordHash)))) {
+    throw new AppError(401, "UNAUTHENTICATED", "Sign-in details are incorrect");
   }
   const session = await mongoose.startSession();
   try {
@@ -223,7 +289,11 @@ export async function acceptInvitation(
       }
       await MembershipModel.findOneAndUpdate(
         { userId: user._id, organisationId: invitation.organisationId },
-        { role: invitation.role, workspaceIds: invitation.workspaceIds },
+        {
+          role: invitation.role,
+          workspaceIds: invitation.workspaceIds,
+          status: "pending_onboarding"
+        },
         { upsert: true, new: true, session }
       );
       invitation.acceptedAt = new Date();

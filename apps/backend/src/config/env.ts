@@ -9,6 +9,11 @@ const envSchema = z.object({
   REFRESH_TOKEN_SECRET: z.string().min(32),
   REALTIME_TICKET_SECRET: z.string().min(32),
   AUTH_RATE_LIMIT: z.coerce.number().int().positive().default(20),
+  EMAIL_PROVIDER: z.enum(["resend", "memory"]).default("memory"),
+  EMAIL_FROM: z.string().default("RelayOps <no-reply@mail.khalidoyeneye.dev>"),
+  RESEND_API_KEY: z.string().min(1).optional(),
+  RESEND_WEBHOOK_SECRET: z.string().min(1).optional(),
+  EMAIL_PAYLOAD_SECRET: z.string().min(32).default("local-email-payload-secret-change-me"),
   DEMO_PASSWORD: z.string().min(12).optional(),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info")
 });

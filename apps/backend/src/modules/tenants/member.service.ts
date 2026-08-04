@@ -10,6 +10,7 @@ export async function listWorkspaceMembers(
   const tenant = await requireWorkspaceAccess(userId, workspaceId);
   const memberships = await MembershipModel.find({
     organisationId: tenant.organisationId,
+    status: "active",
     $or: [{ role: { $in: ["owner", "administrator"] } }, { workspaceIds: workspaceId }]
   }).lean();
   const users = await UserModel.find({ _id: { $in: memberships.map((item) => item.userId) } })

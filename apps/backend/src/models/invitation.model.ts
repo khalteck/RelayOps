@@ -10,6 +10,7 @@ export interface InvitationDocument {
   tokenHash: string;
   expiresAt: Date;
   acceptedAt?: Date;
+  deliveryStatus: "queued" | "sent" | "delivered" | "failed" | "bounced";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,7 +24,12 @@ const invitationSchema = new Schema<InvitationDocument>(
     role: { type: String, enum: ROLES.filter((role) => role !== "owner"), required: true },
     tokenHash: { type: String, required: true, select: false },
     expiresAt: { type: Date, required: true },
-    acceptedAt: Date
+    acceptedAt: Date,
+    deliveryStatus: {
+      type: String,
+      enum: ["queued", "sent", "delivered", "failed", "bounced"],
+      default: "queued"
+    }
   },
   { timestamps: true }
 );

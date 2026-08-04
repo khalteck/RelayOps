@@ -85,6 +85,10 @@ export function WorkspaceRealtimeProvider({
         socket.on("notification.created", () => {
           void client.invalidateQueries({ queryKey: queryKeys.notifications });
         });
+        socket.on("membership.access_changed", () => {
+          void client.invalidateQueries({ queryKey: queryKeys.organisations });
+          window.location.assign("/");
+        });
       })
       .catch(() => setStatus("offline"));
 

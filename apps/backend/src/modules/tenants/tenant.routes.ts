@@ -1,6 +1,7 @@
 import { Router, type Router as ExpressRouter } from "express";
 import {
   inviteMemberInputSchema,
+  membershipStatusInputSchema,
   slaPolicySchema,
   tenantNameInputSchema,
   type InviteMemberInput
@@ -15,7 +16,13 @@ import {
   updateOrganisation,
   updateWorkspace
 } from "./tenant.service.js";
-import { inviteMember, listInvitations, listOrganisationMembers } from "./invitation.service.js";
+import {
+  inviteMember,
+  listInvitations,
+  listOrganisationMembers,
+  resendInvitation
+} from "./invitation.service.js";
+import { changeMemberStatus, removeMember } from "./member-lifecycle.service.js";
 
 const slaInput = z.object({ slaPolicy: slaPolicySchema });
 export const tenantRouter: ExpressRouter = Router();
@@ -61,6 +68,51 @@ tenantRouter.post(
       ),
       meta: { serverTime: new Date().toISOString() }
     });
+  }
+);
+
+tenantRouter.post(
+  "/:organisationId/invitations/:invitationId/resend",
+  requireCsrf,
+  async (request, response) => {
+    response.json({
+      data: await resendInvitation(
+        request.auth!.id,
+        routeParam(request.params.organisationId!),
+        routeParam(request.params.invitationId!)
+      ),
+      meta: { serverTime: new Date().toISOString() }
+    });
+  }
+);
+
+tenantRouter.patch(
+  "/:organisationId/members/:membershipId/status",
+  requireCsrf,
+  validateBody(membershipStatusInputSchema),
+  async (request, response) => {
+    response.json({
+      data: await changeMemberStatus(
+        request.auth!.id,
+        routeParam(request.params.organisationId!),
+        routeParam(request.params.membershipId!),
+        request.body
+      ),
+      meta: { serverTime: new Date().toISOString() }
+    });
+  }
+);
+
+tenantRouter.delete(
+  "/:organisationId/members/:membershipId",
+  requireCsrf,
+  async (request, response) => {
+    await removeMember(
+      request.auth!.id,
+      routeParam(request.params.organisationId!),
+      routeParam(request.params.membershipId!)
+    );
+    response.status(204).send();
   }
 );
 

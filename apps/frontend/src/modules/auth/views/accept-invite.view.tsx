@@ -3,7 +3,9 @@ import { Alert, Button, Input, Tag } from "antd";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AuthLayout } from "../components/auth-layout";
+import { WelcomeIllustration } from "../components/welcome-illustration";
 import { useAcceptInvitation, useInvitationPreview } from "../operations/invitation.queries";
+import { useLogin } from "../operations/auth.queries";
 
 export function Component() {
   const { token = "" } = useParams();
@@ -12,13 +14,15 @@ export function Component() {
   const [password, setPassword] = useState("");
   const preview = useInvitationPreview(token);
   const accept = useAcceptInvitation(token);
+  const login = useLogin();
 
   const acceptInvitation = () => {
     accept.mutate(
       { accountExists: Boolean(preview.data?.accountExists), name, password },
       {
-        onSuccess: ({ data }) => {
-          void navigate(`/login?email=${encodeURIComponent(data.email)}&invited=1`);
+        onSuccess: async ({ data }) => {
+          await login.mutateAsync({ email: data.email, password });
+          void navigate("/onboarding/member", { replace: true });
         }
       }
     );
@@ -33,6 +37,7 @@ export function Component() {
       >
         {preview.data ? (
           <>
+            <WelcomeIllustration />
             <div className="auth-card__heading">
               <span>Workspace invitation</span>
               <h2>Join {preview.data.organisationName}</h2>
@@ -52,12 +57,22 @@ export function Component() {
                   type="info"
                   showIcon
                   message="Existing RelayOps account found"
-                  description="Accept the workspace access, then sign in with your existing password."
+                  description="Confirm your password to securely accept this invitation."
                 />
+                <label>
+                  <span>Password</span>
+                  <Input.Password
+                    size="large"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    autoComplete="current-password"
+                  />
+                </label>
                 <Button
                   type="primary"
                   size="large"
-                  loading={accept.isPending}
+                  loading={accept.isPending || login.isPending}
+                  disabled={password.length < 12}
                   onClick={acceptInvitation}
                 >
                   Accept invitation
@@ -84,7 +99,7 @@ export function Component() {
                 <Button
                   type="primary"
                   size="large"
-                  loading={accept.isPending}
+                  loading={accept.isPending || login.isPending}
                   disabled={name.trim().length < 2 || password.length < 12}
                   onClick={acceptInvitation}
                 >

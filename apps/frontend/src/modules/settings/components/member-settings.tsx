@@ -1,12 +1,15 @@
-import { CopyOutlined, UserAddOutlined } from "@ant-design/icons";
+import { MoreOutlined, UserAddOutlined } from "@ant-design/icons";
 import type { OrganisationSummary, Role } from "@relayops/types";
 import { AsyncState } from "@relayops/ui";
-import { App, Button, Card, Input, Modal, Select, Space, Table, Tag } from "antd";
+import { App, Button, Card, Dropdown, Input, Modal, Select, Table, Tag } from "antd";
 import { useMemo, useState } from "react";
 import {
   useInvitations,
   useInviteMember,
-  useOrganisationMembers
+  useOrganisationMembers,
+  useResendInvitation,
+  useChangeMemberStatus,
+  useRemoveMember
 } from "../operations/member-management.queries";
 
 const invitationalRoles: Array<{ label: string; value: Exclude<Role, "owner"> }> = [
@@ -16,15 +19,17 @@ const invitationalRoles: Array<{ label: string; value: Exclude<Role, "owner"> }>
 ];
 
 export function MemberSettings({ organisation }: { organisation: OrganisationSummary }) {
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
   const members = useOrganisationMembers(organisation.id, true);
   const invitations = useInvitations(organisation.id, true);
   const invite = useInviteMember(organisation.id);
+  const resend = useResendInvitation(organisation.id);
+  const changeStatus = useChangeMemberStatus(organisation.id);
+  const remove = useRemoveMember(organisation.id);
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<Exclude<Role, "owner">>("responder");
   const [workspaceIds, setWorkspaceIds] = useState<string[]>([]);
-  const [acceptUrl, setAcceptUrl] = useState("");
   const workspaceNames = useMemo(
     () => new Map(organisation.workspaces.map((workspace) => [workspace.id, workspace.name])),
     [organisation.workspaces]
@@ -35,12 +40,37 @@ export function MemberSettings({ organisation }: { organisation: OrganisationSum
     setEmail("");
     setRole("responder");
     setWorkspaceIds([]);
-    setAcceptUrl("");
   };
   const submit = async () => {
-    const result = await invite.mutateAsync({ email, role, workspaceIds });
-    setAcceptUrl(result.data.acceptUrl ?? "");
-    void message.success("Invitation created");
+    await invite.mutateAsync({ email, role, workspaceIds });
+    void message.success("Invitation email queued");
+    close();
+  };
+
+  const confirmLifecycle = (
+    member: NonNullable<typeof members.data>[number],
+    action: "suspend" | "restore" | "remove"
+  ) => {
+    modal.confirm({
+      title: `${action[0]?.toUpperCase()}${action.slice(1)} ${member.user.name}?`,
+      content:
+        action === "remove"
+          ? "Their organisation access will be removed, while audit and incident history remain."
+          : `Their access will be ${action === "suspend" ? "blocked immediately" : "restored"}.`,
+      okText: action,
+      okButtonProps: { danger: action !== "restore" },
+      async onOk() {
+        if (action === "remove") await remove.mutateAsync(member.membershipId);
+        else
+          await changeStatus.mutateAsync({
+            membershipId: member.membershipId,
+            status: action === "suspend" ? "suspended" : "active"
+          });
+        void message.success(
+          `Member ${action === "remove" ? "removed" : action === "suspend" ? "suspended" : "restored"}`
+        );
+      }
+    });
   };
 
   return (
@@ -55,9 +85,8 @@ export function MemberSettings({ organisation }: { organisation: OrganisationSum
         }
       >
         <p className="settings-card__description">
-          Invite administrators, responders, or viewers and limit operational roles to selected
-          workspaces. Email delivery is deferred, so copy the secure invitation link after creating
-          it.
+          Invite administrators, responders, or viewers by email and manage their organisation
+          access.
         </p>
         <AsyncState
           loading={members.isPending}
@@ -71,6 +100,18 @@ export function MemberSettings({ organisation }: { organisation: OrganisationSum
             pagination={false}
             scroll={{ x: 620 }}
             columns={[
+              {
+                title: "Status",
+                dataIndex: "status",
+                width: 130,
+                render: (value: string) => (
+                  <Tag
+                    color={value === "active" ? "green" : value === "suspended" ? "red" : "gold"}
+                  >
+                    {value.replace("_", " ")}
+                  </Tag>
+                )
+              },
               {
                 title: "User",
                 key: "user",
@@ -103,6 +144,34 @@ export function MemberSettings({ organisation }: { organisation: OrganisationSum
                 dataIndex: "joinedAt",
                 width: 130,
                 render: (value: string) => new Date(value).toLocaleDateString()
+              },
+              {
+                title: "",
+                key: "actions",
+                width: 54,
+                render: (_value, member) =>
+                  member.role === "owner" ? null : (
+                    <Dropdown
+                      trigger={["click"]}
+                      menu={{
+                        items: [
+                          member.status === "suspended"
+                            ? { key: "restore", label: "Restore access" }
+                            : { key: "suspend", label: "Suspend access" },
+                          { type: "divider" },
+                          { key: "remove", label: "Remove user", danger: true }
+                        ],
+                        onClick: ({ key }) =>
+                          confirmLifecycle(member, key as "suspend" | "restore" | "remove")
+                      }}
+                    >
+                      <Button
+                        type="text"
+                        icon={<MoreOutlined />}
+                        aria-label={`Actions for ${member.user.name}`}
+                      />
+                    </Dropdown>
+                  )
               }
             ]}
           />
@@ -149,39 +218,41 @@ export function MemberSettings({ organisation }: { organisation: OrganisationSum
                 dataIndex: "expiresAt",
                 width: 130,
                 render: (value: string) => new Date(value).toLocaleDateString()
+              },
+              {
+                title: "",
+                key: "actions",
+                width: 90,
+                render: (_value, invitation) =>
+                  invitation.status === "pending" ? (
+                    <Button
+                      type="link"
+                      loading={resend.isPending}
+                      onClick={async () => {
+                        await resend.mutateAsync(invitation.id);
+                        void message.success("Invitation resent");
+                      }}
+                    >
+                      Resend
+                    </Button>
+                  ) : null
               }
             ]}
           />
         </AsyncState>
       </Card>
       <Modal
-        title={acceptUrl ? "Invitation ready" : "Invite a user"}
+        title="Invite a user"
         open={open}
-        okText={acceptUrl ? "Done" : "Create invitation"}
+        okText="Send invitation"
         confirmLoading={invite.isPending}
         okButtonProps={{
-          disabled: !acceptUrl && (!email.includes("@") || workspaceIds.length === 0)
+          disabled: !email.includes("@") || workspaceIds.length === 0
         }}
-        onOk={() => (acceptUrl ? close() : void submit())}
+        onOk={() => void submit()}
         onCancel={close}
       >
-        {acceptUrl ? (
-          <div className="invite-result">
-            <p>Share this one-time link with {email}. It expires in seven days.</p>
-            <Space.Compact block>
-              <Input readOnly value={acceptUrl} aria-label="Invitation link" />
-              <Button
-                icon={<CopyOutlined />}
-                onClick={async () => {
-                  await navigator.clipboard.writeText(acceptUrl);
-                  void message.success("Invitation link copied");
-                }}
-              >
-                Copy
-              </Button>
-            </Space.Compact>
-          </div>
-        ) : (
+        {
           <div className="form-stack form-stack--compact">
             <label>
               <span>Email address</span>
@@ -208,7 +279,7 @@ export function MemberSettings({ organisation }: { organisation: OrganisationSum
               />
             </label>
           </div>
-        )}
+        }
       </Modal>
     </>
   );
