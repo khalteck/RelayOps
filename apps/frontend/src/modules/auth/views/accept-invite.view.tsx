@@ -1,4 +1,5 @@
 import { AsyncState } from "@relayops/ui";
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, PASSWORD_REQUIREMENT } from "@relayops/types";
 import { Alert, Button, Input, Tag } from "antd";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -63,16 +64,21 @@ export function Component() {
                   <span>Password</span>
                   <Input.Password
                     size="large"
+                    maxLength={PASSWORD_MAX_LENGTH}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     autoComplete="current-password"
+                    aria-describedby="invitation-password-guidance"
                   />
+                  <small id="invitation-password-guidance" className="field-hint">
+                    Enter the password for your existing RelayOps account.
+                  </small>
                 </label>
                 <Button
                   type="primary"
                   size="large"
                   loading={accept.isPending || login.isPending}
-                  disabled={password.length < 12}
+                  disabled={password.length < PASSWORD_MIN_LENGTH}
                   onClick={acceptInvitation}
                 >
                   Accept invitation
@@ -92,15 +98,21 @@ export function Component() {
                   <span>Create password</span>
                   <Input.Password
                     size="large"
+                    maxLength={PASSWORD_MAX_LENGTH}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
+                    autoComplete="new-password"
+                    aria-describedby="invitation-new-password-guidance"
                   />
+                  <small id="invitation-new-password-guidance" className="field-hint">
+                    {PASSWORD_REQUIREMENT}
+                  </small>
                 </label>
                 <Button
                   type="primary"
                   size="large"
                   loading={accept.isPending || login.isPending}
-                  disabled={name.trim().length < 2 || password.length < 12}
+                  disabled={name.trim().length < 2 || password.length < PASSWORD_MIN_LENGTH}
                   onClick={acceptInvitation}
                 >
                   Create account and join

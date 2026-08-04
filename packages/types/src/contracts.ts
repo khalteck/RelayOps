@@ -31,9 +31,18 @@ export interface ApiErrorResponse {
   };
 }
 
+export const PASSWORD_MIN_LENGTH = 12;
+export const PASSWORD_MAX_LENGTH = 128;
+export const PASSWORD_REQUIREMENT = "Use 12–128 characters.";
+
+export const passwordSchema = z
+  .string()
+  .min(PASSWORD_MIN_LENGTH, "Password must be at least 12 characters.")
+  .max(PASSWORD_MAX_LENGTH, "Password cannot exceed 128 characters.");
+
 export const loginInputSchema = z.object({
   email: z.email().transform((value) => value.toLowerCase()),
-  password: z.string().min(12).max(128)
+  password: passwordSchema
 });
 
 export const registerStartInputSchema = loginInputSchema.extend({

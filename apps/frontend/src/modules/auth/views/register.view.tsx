@@ -1,5 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerStartInputSchema, type RegisterStartInput } from "@relayops/types";
+import {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_REQUIREMENT,
+  registerStartInputSchema,
+  type RegisterStartInput
+} from "@relayops/types";
 import { Alert, Button, Input } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
@@ -60,19 +65,36 @@ export function Component() {
               name={item.name}
               render={({ field }) =>
                 item.type === "password" ? (
-                  <Input.Password {...field} size="large" autoComplete={item.autoComplete} />
+                  <Input.Password
+                    {...field}
+                    size="large"
+                    maxLength={PASSWORD_MAX_LENGTH}
+                    autoComplete={item.autoComplete}
+                    status={errors[item.name] ? "error" : ""}
+                    aria-invalid={Boolean(errors[item.name])}
+                    aria-describedby={`${item.name}-guidance`}
+                  />
                 ) : (
                   <Input
                     {...field}
                     size="large"
                     type={item.type ?? "text"}
                     autoComplete={item.autoComplete}
+                    status={errors[item.name] ? "error" : ""}
+                    aria-invalid={Boolean(errors[item.name])}
+                    aria-describedby={`${item.name}-guidance`}
                   />
                 )
               }
             />
             {errors[item.name] ? (
-              <small className="field-error">{errors[item.name]?.message}</small>
+              <small id={`${item.name}-guidance`} className="field-error" role="alert">
+                {errors[item.name]?.message}
+              </small>
+            ) : item.name === "password" ? (
+              <small id="password-guidance" className="field-hint">
+                {PASSWORD_REQUIREMENT}
+              </small>
             ) : null}
           </label>
         ))}

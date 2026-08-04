@@ -254,6 +254,11 @@ input {
   font-weight: 500;
 }
 
+.field-hint {
+  color: var(--relay-text-muted);
+  font-weight: 400;
+}
+
 .auth-card__footer {
   margin-top: 24px;
   text-align: center;

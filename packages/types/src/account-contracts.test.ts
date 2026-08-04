@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { inviteMemberInputSchema } from "./account-contracts.js";
+import { acceptInvitationInputSchema, inviteMemberInputSchema } from "./account-contracts.js";
+import { registerStartInputSchema } from "./contracts.js";
 
 describe("member invitation contract", () => {
   it("accepts a scoped operational role", () => {
@@ -20,5 +21,24 @@ describe("member invitation contract", () => {
         workspaceIds: ["workspace-1"]
       })
     ).toThrow();
+  });
+
+  it("explains the missing password requirement precisely", () => {
+    const result = registerStartInputSchema.safeParse({
+      name: "Relay Owner",
+      email: "owner@example.com",
+      password: "too-short"
+    });
+
+    expect(result.error?.issues[0]?.message).toBe("Password must be at least 12 characters.");
+  });
+
+  it("uses the same password policy for invited accounts", () => {
+    const result = acceptInvitationInputSchema.safeParse({
+      name: "Invited User",
+      password: "too-short"
+    });
+
+    expect(result.error?.issues[0]?.message).toBe("Password must be at least 12 characters.");
   });
 });

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ROLES, type Role } from "./enums.js";
 import type { WorkspaceSummary } from "./contracts.js";
-import { accountPreferencesSchema } from "./contracts.js";
+import { accountPreferencesSchema, passwordSchema } from "./contracts.js";
 
 export const updateProfileInputSchema = z.object({
   name: z.string().trim().min(2).max(80)
@@ -15,7 +15,7 @@ export const inviteMemberInputSchema = z.object({
 
 export const acceptInvitationInputSchema = z.object({
   name: z.string().trim().min(2).max(80).optional(),
-  password: z.string().min(12).max(128).optional()
+  password: passwordSchema.optional()
 });
 
 export const ownerOnboardingInputSchema = z.object({
