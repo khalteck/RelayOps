@@ -9,7 +9,7 @@ RelayOps remains paused before external deployment. Complete these steps in orde
 3. Open the [Netlify team dashboard](https://app.netlify.com/teams), choose **DNS**, then select `khalidoyeneye.dev`.
 4. Add the DKIM, SPF, and MX records displayed by Resend exactly as provided. Do not delete existing `NETLIFY` records. Follow the [Netlify DNS guide](https://docs.netlify.com/manage/domains/manage-domains/manage-dns-records/).
 5. Wait for Resend verification, then create a sending-only key at [API Keys](https://resend.com/api-keys).
-6. Create a Resend webhook for `https://relayops-backend.onrender.com/api/v1/webhooks/resend`, subscribe to sent/delivered/bounced/failed events, and retain its signing secret.
+6. Create a Resend webhook for `https://relayops-backend-sim7.onrender.com/api/v1/webhooks/resend`, subscribe to sent/delivered/bounced/failed events, and retain its signing secret.
 
 The configured sender is `RelayOps <no-reply@mail.khalidoyeneye.dev>`. Codes and invitation tokens never appear in application logs or API responses.
 

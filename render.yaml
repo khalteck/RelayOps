@@ -65,7 +65,7 @@ services:
       - key: NODE_VERSION
         value: "24"
       - key: VITE_SOCKET_URL
-        value: https://relayops-backend.onrender.com
+        value: https://relayops-backend-sim7.onrender.com
     headers:
       - path: /*
         name: X-Content-Type-Options
@@ -81,11 +81,11 @@ services:
         value: public, max-age=31536000, immutable
       - path: /*
         name: Content-Security-Policy
-        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://relayops-backend.onrender.com wss://relayops-backend.onrender.com; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://relayops-backend-sim7.onrender.com wss://relayops-backend-sim7.onrender.com; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     routes:
       - type: rewrite
         source: /api/*
-        destination: https://relayops-backend.onrender.com/api/*
+        destination: https://relayops-backend-sim7.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html

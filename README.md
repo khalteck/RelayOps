@@ -39,7 +39,7 @@ instead of committing a large video.
 ## 4. Live demonstration link
 
 Pending the explicit Render deployment approval. The reserved hosts are
-`relayops-frontend.onrender.com` and `relayops-backend.onrender.com`.
+`relayops-frontend.onrender.com` and `relayops-backend-sim7.onrender.com`.
 
 ## 5. Test credentials
 
