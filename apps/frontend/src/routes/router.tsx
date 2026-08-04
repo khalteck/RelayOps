@@ -11,6 +11,7 @@ import { loadAuditLogView } from "@/modules/audit-log";
 import { loadDashboardView } from "@/modules/dashboard";
 import { loadIncidentsView } from "@/modules/incidents";
 import { loadSettingsView } from "@/modules/settings";
+import { loadLandingView } from "@/modules/landing";
 import { Navigate, createBrowserRouter } from "react-router-dom";
 import { loadAppShell } from "./app-shell-route";
 import { RouteError } from "./route-error";
@@ -19,6 +20,7 @@ export const router = createBrowserRouter([
   {
     errorElement: <RouteError />,
     children: [
+      { index: true, lazy: loadLandingView },
       { path: "/login", lazy: loadLoginView },
       { path: "/register", lazy: loadRegisterView },
       { path: "/verify-email", lazy: loadVerifyEmailView },
@@ -28,7 +30,7 @@ export const router = createBrowserRouter([
         children: [
           { path: "/onboarding/owner", lazy: loadOwnerOnboardingView },
           { path: "/onboarding/member", lazy: loadInvitedOnboardingView },
-          { index: true, lazy: () => import("./entry-route") },
+          { path: "/app", lazy: () => import("./entry-route") },
           {
             path: "/app/:orgSlug/:workspaceSlug",
             lazy: loadAppShell,

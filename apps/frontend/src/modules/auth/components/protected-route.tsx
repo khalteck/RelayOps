@@ -27,6 +27,7 @@ export function ProtectedRoute() {
       />
     );
   }
-  if (onboarding && !onboarding.required && isOnboardingRoute) return <Navigate to="/" replace />;
+  if (onboarding && !onboarding.required && isOnboardingRoute)
+    return <Navigate to="/app" replace />;
   return <Outlet />;
 }

@@ -21,7 +21,7 @@ export function Component() {
 
   const submit = handleSubmit(async (values) => {
     await login.mutateAsync(values);
-    await navigate("/");
+    await navigate("/app");
   });
 
   return (

@@ -4,8 +4,8 @@
 
 A multi-tenant incident-management and service-operations platform for distributed product teams.
 
-> Stage 3 local production-readiness work is complete. The Render services remain intentionally
-> undeployed until the explicit deployment review gate is approved.
+> Stage 3 production-readiness work is complete and the public RelayOps experience is available on
+> Render. The frontend and backend remain independently deployable from this monorepo.
 
 ## 1. Product overview
 
@@ -21,6 +21,12 @@ tools while an incident is active. RelayOps makes tenant context, permissions, r
 service commitments, and the incident record explicit in one workflow.
 
 ## 3. Screenshots and demonstration video
+
+![RelayOps public landing page](docs/assets/screenshots/landing-light.png)
+
+| Landing (dark)                                                     | Landing (mobile)                                                       |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| ![RelayOps dark landing](docs/assets/screenshots/landing-dark.png) | ![RelayOps mobile landing](docs/assets/screenshots/landing-mobile.png) |
 
 | Dashboard (light)                                                        | Dashboard (dark)                                                       |
 | ------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
@@ -38,8 +44,9 @@ instead of committing a large video.
 
 ## 4. Live demonstration link
 
-Pending the explicit Render deployment approval. The reserved hosts are
-`relayops-frontend.onrender.com` and `relayops-backend-sim7.onrender.com`.
+[Open the RelayOps live application](https://relayops-frontend.onrender.com/). The API and realtime
+service run independently at `relayops-backend-sim7.onrender.com` behind the frontend's `/api`
+rewrite.
 
 ## 5. Test credentials
 
@@ -54,6 +61,8 @@ These credentials are demo-only. They are never used for production or personal 
 
 ## 6. Core features
 
+- Public, route-split product landing page with adaptive authentication actions and light/dark
+  presentation.
 - Secure cookie authentication, refresh rotation, CSRF protection, and safe logout recovery.
 - Organisation/workspace switching and backend-enforced owner, administrator, responder, and
   viewer roles.

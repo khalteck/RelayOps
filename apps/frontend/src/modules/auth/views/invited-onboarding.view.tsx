@@ -21,7 +21,7 @@ export function Component() {
     session.data?.user.preferences ?? defaultPreferences
   );
   if (!session.isPending && (!state?.required || state.kind !== "invited"))
-    return <Navigate to="/" replace />;
+    return <Navigate to="/app" replace />;
   const finish = async () => {
     const result = await complete.mutateAsync({ name, preferences });
     setTheme(preferences.theme);
